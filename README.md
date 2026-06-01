@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-Phase 6 implements the basic verification engine.
+Phase 7 implements the minimal React frontend MVP on top of the Phase 6 backend.
 
 ## Current Scope
 
@@ -26,16 +26,19 @@ Included:
 - Instructor-defined verification rules for tickets.
 - Student verification runs against own running lab attempts.
 - Verification results with safe pass/fail output.
-- pytest tests for foundation, auth, users, lab templates, labs, lifecycle, and adapter safety.
+- Minimal React, TypeScript, TailwindCSS frontend.
+- Login/logout using JWT access tokens.
+- Role-aware navigation for Admin, Instructor, and Student users.
+- Frontend pages for users, lab templates, labs, tickets, attempts, verification rules, and verification runs.
+- Docker Compose for backend, frontend, PostgreSQL, Redis, and Celery worker.
+- pytest tests for foundation, auth, users, lab templates, labs, tickets, verification, lifecycle, and adapter safety.
 
 Excluded:
 
-- Tickets.
-- Verification.
 - AI Lab Builder.
 - AI Mentor.
-- Frontend.
-- Business database tables.
+- Production-grade frontend session hardening.
+- Advanced UI workflows such as lab console streaming, drag-and-drop topology editing, and analytics.
 
 ## Run With Docker Compose
 
@@ -45,6 +48,18 @@ cp env/backend.env.example env/backend.env
 docker compose up -d --build
 ```
 
+Frontend is served on:
+
+```text
+http://10.0.44.2:3000
+```
+
+Backend API is served on:
+
+```text
+http://10.0.44.2:8000
+```
+
 ## Run Alembic
 
 ```bash
@@ -52,7 +67,7 @@ cd /opt/isp-academy/deployments
 docker compose exec backend alembic upgrade head
 ```
 
-Phase 6 creates `users`, `lab_templates`, `lab_instances`, `lab_nodes`, `lab_events`, `tickets`, `ticket_attempts`, `verification_rules`, `verification_runs`, and `verification_results`.
+The backend migrations create `users`, `lab_templates`, `lab_instances`, `lab_nodes`, `lab_events`, `tickets`, `ticket_attempts`, `verification_rules`, `verification_runs`, and `verification_results`.
 
 ## Seed Initial Admin
 
