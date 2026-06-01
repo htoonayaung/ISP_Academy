@@ -4,6 +4,9 @@ import { Badge } from "../../components/ui/Badge";
 import { Card } from "../../components/ui/Card";
 import { Alert } from "../../components/ui/Alert";
 import { Spinner } from "../../components/ui/Spinner";
+import { CopyId } from "../../components/ui/CopyId";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Table, Td, Th } from "../../components/ui/Table";
 import { api } from "../../lib/api";
 import { formatDate } from "../../lib/format";
@@ -27,8 +30,12 @@ export function VerificationRunPage() {
   }, [run?.status, id]);
   if (!run && !error) return <Spinner />;
   if (!run) return <Alert message={error} />;
-  return <Card title={`Verification ${run.id.slice(0, 8)}`} action={<Badge value={run.status} />}>
+  return <div className="space-y-4">
+  <PageHeader title={`Verification ${run.id.slice(0, 8)}`} subtitle="Review per-rule verification results for this attempt." action={<CopyId id={run.id} label="Run ID" />} />
+  <Card title="Verification Results" subtitle="PASSED, FAILED, or ERROR is shown for each rule." action={<Badge value={run.status} />}>
     {error && <div className="mb-3"><Alert message={error} /></div>}
     <Table><thead><tr><Th>Rule</Th><Th>Status</Th><Th>Message</Th><Th>Created</Th></tr></thead><tbody>{run.results.map((result) => <tr key={result.id}><Td>{result.verification_rule_id.slice(0, 8)}</Td><Td><Badge value={result.status} /></Td><Td>{result.message}</Td><Td>{formatDate(result.created_at)}</Td></tr>)}</tbody></Table>
-  </Card>;
+    {run.results.length === 0 && <EmptyState title="No rule results yet" description="Queued or running verification tasks will populate this table shortly." />}
+  </Card>
+  </div>;
 }

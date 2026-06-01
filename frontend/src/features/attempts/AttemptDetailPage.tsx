@@ -5,6 +5,9 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Alert } from "../../components/ui/Alert";
 import { Spinner } from "../../components/ui/Spinner";
+import { CopyId } from "../../components/ui/CopyId";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Table, Td, Th } from "../../components/ui/Table";
 import { api } from "../../lib/api";
 import { Lab } from "../../types/lab";
@@ -39,13 +42,14 @@ export function AttemptDetailPage() {
   }
   if (!attempt || !lab) return error ? <Alert message={error} /> : <Spinner />;
   return <div className="space-y-4">
+    <PageHeader title={`Attempt ${attempt.id.slice(0, 8)}`} subtitle="Start the linked lab, wait for RUNNING, then run verification." action={<CopyId id={attempt.id} label="Attempt ID" />} />
     {error && <Alert message={error} />}
     <Card title={`Attempt ${attempt.id.slice(0, 8)}`} action={<Badge value={attempt.status} />}>
       <div className="flex flex-wrap items-center gap-3"><Link className="text-teal-700" to={`/labs/${lab.id}`}>Open linked lab</Link><Badge value={lab.status} /></div>
-      {lab.status !== "RUNNING" && <p className="mt-3 text-sm text-amber-700">Start the lab before running verification.</p>}
+      {lab.status !== "RUNNING" && <p className="mt-3 text-sm text-amber-700">Start the lab and wait until it is RUNNING before running verification.</p>}
       {message && <p className="mt-3 text-sm text-rose-700">{message}</p>}
       <Button className="mt-3" disabled={lab.status !== "RUNNING"} onClick={verify}>Run verification</Button>
     </Card>
-    <Card title="Verification Runs"><Table><thead><tr><Th>Run</Th><Th>Status</Th><Th>Results</Th></tr></thead><tbody>{runs.map((run) => <tr key={run.id}><Td><Link className="text-teal-700" to={`/verification-runs/${run.id}`}>{run.id.slice(0, 8)}</Link></Td><Td><Badge value={run.status} /></Td><Td>{run.results?.length || 0}</Td></tr>)}</tbody></Table></Card>
+    <Card title="Verification Runs" subtitle="Queued and running checks refresh automatically."><Table><thead><tr><Th>Run</Th><Th>Status</Th><Th>Results</Th></tr></thead><tbody>{runs.map((run) => <tr key={run.id}><Td><Link className="text-teal-700" to={`/verification-runs/${run.id}`}>{run.id.slice(0, 8)}</Link></Td><Td><Badge value={run.status} /></Td><Td>{run.results?.length || 0}</Td></tr>)}</tbody></Table>{runs.length === 0 && <EmptyState title="No verification runs yet" description="Run verification after the linked lab reaches RUNNING." />}</Card>
   </div>;
 }

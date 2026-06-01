@@ -4,7 +4,9 @@ import { Alert } from "../../components/ui/Alert";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { EmptyState } from "../../components/ui/EmptyState";
 import { Modal } from "../../components/ui/Modal";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Table, Td, Th } from "../../components/ui/Table";
 import { api } from "../../lib/api";
 import { LabTemplate, ValidationResult } from "../../types/labTemplate";
@@ -40,11 +42,14 @@ export function LabTemplatesPage() {
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to deactivate template"); }
   }
   return (
-    <div className="space-y-4"><Card title="Lab Templates" action={<Button onClick={() => setCreating(true)}>Create template</Button>}>
+    <div className="space-y-4">
+      <PageHeader title="Lab Templates" subtitle="Create safe Containerlab YAML templates. This phase validates templates but does not expand the lab engine scope." />
+      <Card title="Lab Templates" subtitle="Active templates are visible to students." action={<Button onClick={() => setCreating(true)}>Create template</Button>}>
       {error && <Alert message={error} />}{message && <div className="mb-3 rounded-md bg-teal-50 px-3 py-2 text-sm text-teal-800">{message}</div>}
-      <Table><thead><tr><Th>Name</Th><Th>Category</Th><Th>Status</Th><Th>Actions</Th></tr></thead><tbody>
-        {templates.map((template) => <tr key={template.id}><Td><Link className="font-medium text-teal-700" to={`/lab-templates/${template.id}`}>{template.name}</Link></Td><Td>{template.category}</Td><Td><Badge value={template.is_active ? "ACTIVE" : "INACTIVE"} /></Td><Td><div className="flex flex-wrap gap-2"><Button onClick={() => setEditing(template)}>Edit</Button><Button onClick={() => validate(template.id)}>Validate</Button><Button className="bg-rose-700 hover:bg-rose-800" onClick={() => deactivate(template.id)}>Deactivate</Button></div></Td></tr>)}
+      <Table><thead><tr><Th>Name</Th><Th>Category</Th><Th>Difficulty</Th><Th>Status</Th><Th>Actions</Th></tr></thead><tbody>
+        {templates.map((template) => <tr key={template.id}><Td><Link className="font-medium text-teal-700" to={`/lab-templates/${template.id}`}>{template.name}</Link><div className="text-xs text-slate-500">{template.description}</div></Td><Td>{template.category}</Td><Td><Badge value={template.difficulty} /></Td><Td><Badge value={template.is_active ? "ACTIVE" : "INACTIVE"} /></Td><Td><div className="flex flex-wrap gap-2"><Button onClick={() => setEditing(template)}>Edit</Button><Button onClick={() => validate(template.id)}>Validate</Button><Button className="bg-rose-700 hover:bg-rose-800" onClick={() => deactivate(template.id)}>Deactivate</Button></div></Td></tr>)}
       </tbody></Table>
+      {templates.length === 0 && !error && <EmptyState title="No lab templates yet" description="Create a Linux or FRR template, validate it, then activate it for ticket use." />}
     </Card>{(creating || editing) && <Modal title={editing ? "Lab template" : "Create template"} onClose={() => { setCreating(false); setEditing(null); }}><LabTemplateForm template={editing || undefined} onSubmit={save} /></Modal>}</div>
   );
 }

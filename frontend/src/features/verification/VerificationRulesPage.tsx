@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Alert } from "../../components/ui/Alert";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Table, Td, Th } from "../../components/ui/Table";
@@ -44,7 +46,9 @@ export function VerificationRulesPage() {
       await load();
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to delete rule"); }
   }
-  return <div className="space-y-4"><Card title="Verification Rules">
+  return <div className="space-y-4">
+  <PageHeader title="Verification Rules" subtitle="Create simple command checks for this ticket. Rules run only against lab-owned nodes." />
+  <Card title="Create Rule" subtitle="Target node is the node name in the lab template. Command output is compared with the selected assertion.">
     {error && <div className="mb-3"><Alert message={error} /></div>}
     <form onSubmit={submit} className="mb-4 grid gap-3 md:grid-cols-3">
       <Input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -55,6 +59,7 @@ export function VerificationRulesPage() {
       <Input type="number" value={form.timeout_seconds} onChange={(e) => setForm({ ...form, timeout_seconds: Number(e.target.value) })} />
       <Button className="md:col-span-3">Create rule</Button>
     </form>
-    <Table><thead><tr><Th>Name</Th><Th>Node</Th><Th>Assertion</Th><Th>Action</Th></tr></thead><tbody>{rules.map((rule) => <tr key={rule.id}><Td>{rule.name}</Td><Td>{rule.target_node}</Td><Td>{rule.assertion_type}</Td><Td><Button className="bg-rose-700 hover:bg-rose-800" onClick={() => remove(rule)}>Delete</Button></Td></tr>)}</tbody></Table>
+    <Table><thead><tr><Th>Name</Th><Th>Target Node</Th><Th>Command</Th><Th>Assertion</Th><Th>Expected</Th><Th>Action</Th></tr></thead><tbody>{rules.map((rule) => <tr key={rule.id}><Td>{rule.name}</Td><Td>{rule.target_node}</Td><Td><code className="rounded bg-slate-100 px-1">{rule.command}</code></Td><Td>{rule.assertion_type}</Td><Td>{rule.expected_value || "-"}</Td><Td><Button className="bg-rose-700 hover:bg-rose-800" onClick={() => remove(rule)}>Delete</Button></Td></tr>)}</tbody></Table>
+    {rules.length === 0 && !error && <EmptyState title="No verification rules yet" description="Add a target node, command, assertion, and expected value for the student demo." />}
   </Card></div>;
 }

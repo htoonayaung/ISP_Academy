@@ -42,6 +42,7 @@ export function TicketForm({ ticket, templates, onSubmit }: { ticket?: Ticket; t
     <Textarea placeholder="Description" value={data.description} onChange={(e) => setData({ ...data, description: e.target.value })} />
     <Textarea placeholder="Student instructions" value={data.student_instructions} onChange={(e) => setData({ ...data, student_instructions: e.target.value })} />
     <Textarea placeholder="Hints" value={data.hints || ""} onChange={(e) => setData({ ...data, hints: e.target.value })} />
+    <p className="text-xs font-medium text-amber-700">Instructor-only solution. This field must never appear in the student UI.</p>
     <Textarea placeholder="Hidden solution" value={data.hidden_solution || ""} onChange={(e) => setData({ ...data, hidden_solution: e.target.value })} />
     <Select value={data.status} onChange={(e) => setData({ ...data, status: e.target.value as Ticket["status"] })}><option>DRAFT</option><option>PUBLISHED</option><option>ARCHIVED</option></Select>
     <Button>{ticket ? "Update ticket" : "Create ticket"}</Button>

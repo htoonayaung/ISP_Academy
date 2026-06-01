@@ -1,51 +1,48 @@
-# Python
+# Ignore everything in this mixed workspace by default.
+*
+
+# Track only the AI-Powered ISP Academy MVP project files.
+!backend/
+!backend/**
+!deployments/
+!deployments/**
+!docs/
+!docs/**
+!frontend/
+!frontend/**
+!scripts/
+!scripts/**
+!backups/
+!backups/.gitkeep
+!README.md
+!.gitignore
+
+# Python/cache/build artifacts.
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
 .pytest_cache/
-.mypy_cache/
 .ruff_cache/
+.mypy_cache/
 .coverage
 htmlcov/
-.venv/
-venv/
-env/
 
-# Environment / secrets
-.env
+# Local environment files and secrets.
 *.env
+backend.env
 deployments/env/backend.env
-deployments/env/*.env
-!deployments/env/*.env.example
 
-# Docker / runtime
-*.log
-logs/
-tmp/
-*.pid
+# Backup outputs.
+backups/*.sql
+backups/*.dump
+backups/*.tar.gz
+!backups/.gitkeep
 
-# Database / local data
-*.sqlite3
-*.db
-postgres-data/
-redis-data/
-
-# Lab/runtime storage
+# Runtime lab files.
 lab-storage/
-clab-test/
+lab-storage/**
 
-# Alembic cache
-backend/alembic/versions/__pycache__/
-
-# Frontend future
-node_modules/
-dist/
-build/
-.vite/
-
-# IDE / OS
-.vscode/
-.idea/
+# OS/editor noise.
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/

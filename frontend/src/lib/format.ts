@@ -3,6 +3,17 @@ export function formatDate(value: string | null | undefined): string {
   return new Date(value).toLocaleString();
 }
 
+export function shortId(value: string): string {
+  return value.slice(0, 8);
+}
+
+export function roleLabel(role: string | undefined): string {
+  if (role === "ADMIN") return "Administrator";
+  if (role === "INSTRUCTOR") return "Instructor";
+  if (role === "STUDENT") return "Student";
+  return "Unknown role";
+}
+
 export function canStartLab(status: string): boolean {
   return ["CREATED", "STOPPED", "FAILED"].includes(status);
 }
@@ -16,9 +27,9 @@ export function canDestroyLab(status: string): boolean {
 }
 
 export function statusTone(status: string): "green" | "red" | "yellow" | "gray" | "blue" {
-  if (["RUNNING", "PASSED", "PUBLISHED"].includes(status)) return "green";
+  if (["RUNNING", "PASSED", "PUBLISHED", "ACTIVE"].includes(status)) return "green";
   if (["FAILED", "ERROR", "ARCHIVED"].includes(status)) return "red";
   if (["STARTING", "STOPPING", "DESTROYING", "QUEUED", "RUNNING"].includes(status)) return "yellow";
-  if (["CREATED", "STARTED", "DRAFT"].includes(status)) return "blue";
+  if (["CREATED", "STARTED", "DRAFT", "IN_PROGRESS"].includes(status)) return "blue";
   return "gray";
 }
