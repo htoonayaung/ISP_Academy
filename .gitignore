@@ -1,0 +1,54 @@
+cat > .gitignore <<'EOF'
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+*.env
+deployments/env/backend.env
+deployments/env/*.env
+!deployments/env/*.env.example
+
+# Docker / runtime
+*.log
+logs/
+tmp/
+*.pid
+
+# Database / local data
+*.sqlite3
+*.db
+postgres-data/
+redis-data/
+
+# Alembic cache
+backend/alembic/versions/__pycache__/
+
+# Lab runtime storage
+lab-storage/instances/
+lab-storage/templates/*/runtime/
+lab-storage/**/logs/
+
+# Frontend future
+node_modules/
+dist/
+build/
+.vite/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+EOF

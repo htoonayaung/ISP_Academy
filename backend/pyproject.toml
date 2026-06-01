@@ -1,0 +1,24 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["app/tests"]
+pythonpath = ["."]
+env = [
+    "APP_NAME=AI-Powered ISP Academy MVP",
+    "APP_VERSION=0.1.0",
+    "ENVIRONMENT=testing",
+    "DEBUG=false",
+    "LOG_LEVEL=INFO",
+    "POSTGRES_HOST=postgres",
+    "POSTGRES_PORT=5432",
+    "POSTGRES_USER=isp_academy",
+    "POSTGRES_PASSWORD=testing_password",
+    "POSTGRES_DB=isp_academy",
+    "REDIS_URL=redis://redis:6379/0",
+    "CELERY_BROKER_URL=redis://redis:6379/1",
+    "CELERY_RESULT_BACKEND=redis://redis:6379/2"
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
