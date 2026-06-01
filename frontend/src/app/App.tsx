@@ -2,6 +2,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "../components/layout/AppLayout";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import { RoleRoute } from "../components/layout/RoleRoute";
+import { AiLabBuilderPage } from "../features/aiLabBuilder/AiLabBuilderPage";
+import { AiLabBuilderPreviewDetailPage } from "../features/aiLabBuilder/AiLabBuilderPreviewDetailPage";
+import { AiLabBuilderPreviewsPage } from "../features/aiLabBuilder/AiLabBuilderPreviewsPage";
 import { AttemptDetailPage } from "../features/attempts/AttemptDetailPage";
 import { MyAttemptsPage } from "../features/attempts/MyAttemptsPage";
 import { LoginPage } from "../features/auth/LoginPage";
@@ -32,6 +35,9 @@ export function App() {
             <Route path="/users" element={<UsersPage />} />
           </Route>
           <Route element={<RoleRoute roles={["ADMIN", "INSTRUCTOR"]} />}>
+            <Route path="/ai-lab-builder" element={<AiLabBuilderPage />} />
+            <Route path="/ai-lab-builder/previews" element={<AiLabBuilderPreviewsPage />} />
+            <Route path="/ai-lab-builder/previews/:id" element={<AiLabBuilderPreviewDetailPage />} />
             <Route path="/lab-templates" element={<LabTemplatesPage />} />
             <Route path="/lab-templates/:id" element={<LabTemplateDetailPage />} />
             <Route path="/verification-rules" element={<VerificationRulesIndexPage />} />

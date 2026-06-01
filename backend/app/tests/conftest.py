@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.api.deps import get_db_session
 from app.core.security import hash_password
 from app.db.base import Base
+from app.models.ai import AILabBuilderPreview  # noqa: F401
 from app.models.lab_instance import LabEvent, LabInstance, LabNode  # noqa: F401
 from app.models.lab_template import LabTemplate
 from app.models.ticket import Ticket, TicketAttempt  # noqa: F401

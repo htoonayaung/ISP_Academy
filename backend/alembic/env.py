@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.core.config import get_settings
 from app.db.base import Base
+from app.models import ai  # noqa: F401
 from app.models import lab_instance  # noqa: F401
 from app.models import lab_template  # noqa: F401
 from app.models import ticket  # noqa: F401

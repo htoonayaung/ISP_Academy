@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-Phase 7.5 packages the current MVP for demos: backend, lab engine, verification engine, minimal frontend, documentation, and backup guidance.
+Phase 8 adds AI Lab Builder v1 on top of the current MVP: backend, lab engine, verification engine, minimal frontend, documentation, backup guidance, and admin/instructor-only AI preview approval.
 
 ## Current MVP Status
 
@@ -16,11 +16,11 @@ Completed:
 - Basic verification rules and verification runs.
 - Minimal React, TypeScript, TailwindCSS frontend.
 - Role-aware navigation and demo-ready browser workflow.
+- AI Lab Builder v1 preview, validation, and approval into inactive lab templates.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
 Not included yet:
 
-- AI Lab Builder.
 - AI Mentor.
 - Web terminal.
 - Certification, leaderboard, or analytics.
@@ -56,20 +56,21 @@ docker compose -f deployments/docker-compose.yml exec backend python -m app.scri
 
 1. Admin logs in.
 2. Admin creates instructor and student accounts.
-3. Admin or instructor creates a lab template.
-4. Validate the template.
-5. Create a ticket from the template.
-6. Add hints and instructor-only hidden solution.
-7. Publish the ticket.
-8. Create verification rules.
-9. Student logs in.
-10. Student opens the published ticket.
-11. Student starts an attempt.
-12. Student opens the linked lab.
-13. Student starts the lab and waits for `RUNNING`.
-14. Student runs verification.
-15. Student opens the verification run result.
-16. Student destroys the lab.
+3. Admin or instructor generates an AI Lab Builder preview, or manually creates a lab template.
+4. Review AI validation, approve the preview into an inactive lab template, then activate/edit the template if needed.
+5. Validate the template.
+6. Create a ticket from the template.
+7. Add hints and instructor-only hidden solution.
+8. Publish the ticket.
+9. Create verification rules.
+10. Student logs in.
+11. Student opens the published ticket.
+12. Student starts an attempt.
+13. Student opens the linked lab.
+14. Student starts the lab and waits for `RUNNING`.
+15. Student runs verification.
+16. Student opens the verification run result.
+17. Student destroys the lab.
 
 Full checklist: [docs/DemoGuide.md](docs/DemoGuide.md)
 
@@ -96,6 +97,33 @@ curl http://10.0.44.2:8000/health
 curl http://10.0.44.2:8000/ready
 curl http://10.0.44.2:8000/api/v1/system/info
 ```
+
+## AI Lab Builder V1
+
+AI Lab Builder is disabled by default. Enable it only when an AI provider is configured, or use the `mock` provider for local/demo testing:
+
+```env
+AI_LAB_BUILDER_ENABLED=true
+AI_PROVIDER=mock
+AI_API_BASE_URL=
+AI_API_KEY=
+AI_MODEL=
+AI_REQUEST_TIMEOUT_SECONDS=30
+AI_MAX_TOKENS=4000
+```
+
+Open the frontend as Admin or Instructor:
+
+- `http://10.0.44.2:3000/ai-lab-builder`
+- `http://10.0.44.2:3000/ai-lab-builder/previews`
+
+Phase 8 behavior:
+
+- AI output is stored only as a preview first.
+- Backend validation is mandatory.
+- Approval creates an inactive `LabTemplate`.
+- Approval does not create, start, inspect, stop, or destroy a lab.
+- Students cannot access AI Lab Builder routes or menus.
 
 ## Backup
 
@@ -145,7 +173,8 @@ Before broader deployment, replace this with a narrower lab executor boundary.
 - JWT is stored in browser `localStorage`.
 - HTTP is used unless HTTPS is configured externally.
 - `celery_worker` has privileged host access for Containerlab.
-- No AI Lab Builder yet.
+- AI Lab Builder v1 has a simple OpenAI-compatible provider abstraction and mock provider only.
+- AI-generated FRR startup configs are previewed, not automatically wired into full lab deployment.
 - No AI Mentor yet.
 - No production hardening yet.
 - No automated frontend test suite yet.
@@ -159,5 +188,6 @@ Before broader deployment, replace this with a narrower lab executor boundary.
 - [Student Guide](docs/StudentGuide.md)
 - [Troubleshooting](docs/Troubleshooting.md)
 - [Backup And Restore](docs/BackupRestore.md)
+- [AI Lab Builder Guide](docs/AiLabBuilderGuide.md)
 - [Architecture](docs/Architecture.md)
 - [Security Rules](docs/SecurityRules.md)

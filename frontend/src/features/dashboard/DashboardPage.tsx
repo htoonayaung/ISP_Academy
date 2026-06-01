@@ -8,13 +8,15 @@ import { Link } from "react-router-dom";
 export function DashboardPage() {
   const { user } = useAuth();
   const quickActions = user?.role === "ADMIN"
-    ? [
+      ? [
         { label: "Manage users", to: "/users" },
+        { label: "AI lab builder", to: "/ai-lab-builder" },
         { label: "Create templates", to: "/lab-templates" },
         { label: "Manage tickets", to: "/tickets" }
       ]
     : user?.role === "INSTRUCTOR"
       ? [
+          { label: "AI lab builder", to: "/ai-lab-builder" },
           { label: "Create templates", to: "/lab-templates" },
           { label: "Manage tickets", to: "/tickets" },
           { label: "Verification rules", to: "/verification-rules" }

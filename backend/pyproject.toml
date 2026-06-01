@@ -27,7 +27,14 @@ env = [
     "LAB_ROOT=/tmp/isp-academy-test-labs",
     "CONTAINERLAB_BIN=/usr/bin/containerlab",
     "CONTAINERLAB_COMMAND_TIMEOUT_SECONDS=120",
-    "LAB_EVENT_OUTPUT_LIMIT=12000"
+    "LAB_EVENT_OUTPUT_LIMIT=12000",
+    "AI_LAB_BUILDER_ENABLED=false",
+    "AI_PROVIDER=mock",
+    "AI_API_BASE_URL=http://ai-provider.test/v1",
+    "AI_API_KEY=test-ai-key",
+    "AI_MODEL=test-model",
+    "AI_REQUEST_TIMEOUT_SECONDS=5",
+    "AI_MAX_TOKENS=2000"
 ]
 
 [tool.ruff]

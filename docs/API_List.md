@@ -101,8 +101,11 @@ No authentication, user, lab, ticket, verification, AI, mentor, admin, or instru
 | Phase | Method | Path | Purpose | Roles |
 | --- | --- | --- | --- | --- |
 | Phase 8 | `POST` | `/api/v1/ai-lab-builder/preview` | Generate validated lab preview. | Admin, Instructor |
+| Phase 8 | `GET` | `/api/v1/ai-lab-builder/previews` | List AI lab previews. | Admin all, owner Instructor |
 | Phase 8 | `GET` | `/api/v1/ai-lab-builder/previews/{preview_id}` | View preview. | Admin, owner Instructor |
-| Phase 8 | `POST` | `/api/v1/ai-lab-builder/{preview_id}/approve` | Approve preview and create lab template. | Admin, owner Instructor |
+| Phase 8 | `POST` | `/api/v1/ai-lab-builder/previews/{preview_id}/approve` | Approve preview and create inactive lab template. | Admin, owner Instructor |
+| Phase 8 | `POST` | `/api/v1/ai-lab-builder/previews/{preview_id}/reject` | Reject preview. | Admin, owner Instructor |
+| Phase 8 | `DELETE` | `/api/v1/ai-lab-builder/previews/{preview_id}` | Delete unapproved preview. | Admin, owner Instructor |
 
 ## AI Mentor Lite
 
@@ -131,4 +134,3 @@ No authentication, user, lab, ticket, verification, AI, mentor, admin, or instru
 - Verification commands come from instructor-defined rules, not arbitrary student input.
 - AI endpoints are disabled when provider config is disabled.
 - Endpoints must be implemented only in their assigned phase.
-

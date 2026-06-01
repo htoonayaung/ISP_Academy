@@ -51,6 +51,14 @@ class Settings(BaseSettings):
     initial_admin_password: str = Field(alias="INITIAL_ADMIN_PASSWORD")
     initial_admin_full_name: str = Field(default="Initial Admin", alias="INITIAL_ADMIN_FULL_NAME")
 
+    ai_lab_builder_enabled: bool = Field(default=False, alias="AI_LAB_BUILDER_ENABLED")
+    ai_provider: str = Field(default="openai_compatible", alias="AI_PROVIDER")
+    ai_api_base_url: str | None = Field(default=None, alias="AI_API_BASE_URL")
+    ai_api_key: str | None = Field(default=None, alias="AI_API_KEY")
+    ai_model: str | None = Field(default=None, alias="AI_MODEL")
+    ai_request_timeout_seconds: int = Field(default=30, alias="AI_REQUEST_TIMEOUT_SECONDS")
+    ai_max_tokens: int = Field(default=4000, alias="AI_MAX_TOKENS")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
