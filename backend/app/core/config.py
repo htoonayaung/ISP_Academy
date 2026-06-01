@@ -21,6 +21,18 @@ class Settings(BaseSettings):
     celery_broker_url: str = Field(default="redis://redis:6379/1", alias="CELERY_BROKER_URL")
     celery_result_backend: str = Field(default="redis://redis:6379/2", alias="CELERY_RESULT_BACKEND")
 
+    jwt_secret_key: str = Field(alias="JWT_SECRET_KEY")
+    jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
+    jwt_access_token_expire_minutes: int = Field(
+        default=30,
+        alias="JWT_ACCESS_TOKEN_EXPIRE_MINUTES",
+    )
+
+    initial_admin_email: str = Field(default="admin@example.com", alias="INITIAL_ADMIN_EMAIL")
+    initial_admin_username: str = Field(default="admin", alias="INITIAL_ADMIN_USERNAME")
+    initial_admin_password: str = Field(alias="INITIAL_ADMIN_PASSWORD")
+    initial_admin_full_name: str = Field(default="Initial Admin", alias="INITIAL_ADMIN_FULL_NAME")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -40,4 +52,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-

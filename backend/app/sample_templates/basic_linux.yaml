@@ -1,0 +1,14 @@
+name: basic-linux-connectivity
+topology:
+  nodes:
+    host1:
+      kind: linux
+      image: alpine:latest
+    host2:
+      kind: linux
+      image: alpine:latest
+  links:
+    - endpoints:
+        - host1:eth1
+        - host2:eth1
+

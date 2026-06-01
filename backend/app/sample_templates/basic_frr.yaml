@@ -1,0 +1,14 @@
+name: basic-frr-two-router
+topology:
+  nodes:
+    r1:
+      kind: frr
+      image: quay.io/frrouting/frr:latest
+    r2:
+      kind: frr
+      image: quay.io/frrouting/frr:latest
+  links:
+    - endpoints:
+        - r1:eth1
+        - r2:eth1
+
