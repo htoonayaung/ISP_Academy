@@ -21,6 +21,14 @@ class Settings(BaseSettings):
     celery_broker_url: str = Field(default="redis://redis:6379/1", alias="CELERY_BROKER_URL")
     celery_result_backend: str = Field(default="redis://redis:6379/2", alias="CELERY_RESULT_BACKEND")
 
+    lab_root: str = Field(default="/opt/isp-academy/lab-storage", alias="LAB_ROOT")
+    containerlab_bin: str = Field(default="/usr/bin/containerlab", alias="CONTAINERLAB_BIN")
+    containerlab_command_timeout_seconds: int = Field(
+        default=120,
+        alias="CONTAINERLAB_COMMAND_TIMEOUT_SECONDS",
+    )
+    lab_event_output_limit: int = Field(default=12000, alias="LAB_EVENT_OUTPUT_LIMIT")
+
     jwt_secret_key: str = Field(alias="JWT_SECRET_KEY")
     jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
     jwt_access_token_expire_minutes: int = Field(

@@ -8,8 +8,21 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.api.deps import get_db_session
 from app.core.security import hash_password
 from app.db.base import Base
+from app.models.lab_instance import LabEvent, LabInstance, LabNode  # noqa: F401
+from app.models.lab_template import LabTemplate
 from app.main import app
 from app.models.user import User, UserRole
+
+
+VALID_LAB_YAML = """
+name: basic-linux
+topology:
+  nodes:
+    host1:
+      kind: linux
+      image: alpine:3.20
+      cmd: sleep infinity
+"""
 
 
 @pytest_asyncio.fixture
@@ -122,3 +135,53 @@ def auth_header() -> Generator:
         return {"Authorization": f"Bearer {token}"}
 
     yield build
+
+
+@pytest_asyncio.fixture
+async def active_template(
+    session_factory: async_sessionmaker[AsyncSession],
+    seeded_users: dict[str, User],
+) -> LabTemplate:
+    async with session_factory() as session:
+        template = LabTemplate(
+            name="Active Lab",
+            slug="active-lab",
+            description="Active lab",
+            category="Linux",
+            difficulty="Easy",
+            containerlab_yaml=VALID_LAB_YAML,
+            estimated_cpu=1,
+            estimated_memory_mb=128,
+            estimated_duration_minutes=30,
+            is_active=True,
+            created_by=seeded_users["admin"].id,
+        )
+        session.add(template)
+        await session.commit()
+        await session.refresh(template)
+        return template
+
+
+@pytest_asyncio.fixture
+async def inactive_template(
+    session_factory: async_sessionmaker[AsyncSession],
+    seeded_users: dict[str, User],
+) -> LabTemplate:
+    async with session_factory() as session:
+        template = LabTemplate(
+            name="Inactive Lab",
+            slug="inactive-lab",
+            description="Inactive lab",
+            category="Linux",
+            difficulty="Easy",
+            containerlab_yaml=VALID_LAB_YAML,
+            estimated_cpu=1,
+            estimated_memory_mb=128,
+            estimated_duration_minutes=30,
+            is_active=False,
+            created_by=seeded_users["admin"].id,
+        )
+        session.add(template)
+        await session.commit()
+        await session.refresh(template)
+        return template

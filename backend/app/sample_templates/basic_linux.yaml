@@ -4,11 +4,12 @@ topology:
     host1:
       kind: linux
       image: alpine:latest
+      cmd: sleep infinity
     host2:
       kind: linux
       image: alpine:latest
+      cmd: sleep infinity
   links:
     - endpoints:
         - host1:eth1
         - host2:eth1
-

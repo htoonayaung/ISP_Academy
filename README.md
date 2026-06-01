@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-Phase 2 implements simple authentication and role-based user management.
+Phase 4 implements the Containerlab lab engine for MVP lab instances.
 
 ## Current Scope
 
@@ -17,13 +17,14 @@ Included:
 - JWT access tokens.
 - Admin, Instructor, and Student roles.
 - User management APIs.
-- pytest tests for foundation, auth, users, and permissions.
+- Lab template CRUD and safety validation.
+- Lab instance lifecycle APIs.
+- Worker-only Containerlab deploy, inspect, and destroy operations.
+- Lab nodes and lab event history.
+- pytest tests for foundation, auth, users, lab templates, labs, lifecycle, and adapter safety.
 
 Excluded:
 
-- Lab templates.
-- Lab instances.
-- Containerlab adapter.
 - Tickets.
 - Verification.
 - AI Lab Builder.
@@ -46,7 +47,7 @@ cd /opt/isp-academy/deployments
 docker compose exec backend alembic upgrade head
 ```
 
-Phase 2 creates the `users` table and `user_role` enum.
+Phase 4 creates `users`, `lab_templates`, `lab_instances`, `lab_nodes`, and `lab_events`.
 
 ## Seed Initial Admin
 
@@ -83,6 +84,29 @@ curl http://localhost:8000/api/v1/auth/me \
   -H "Authorization: Bearer ACCESS_TOKEN"
 ```
 
+## Lab Checks
+
+```bash
+curl -X POST http://localhost:8000/api/v1/labs \
+  -H "Authorization: Bearer ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"template_id":"LAB_TEMPLATE_ID"}'
+```
+
+```bash
+curl -X POST http://localhost:8000/api/v1/labs/LAB_ID/start \
+  -H "Authorization: Bearer ACCESS_TOKEN"
+
+curl http://localhost:8000/api/v1/labs/LAB_ID/status \
+  -H "Authorization: Bearer ACCESS_TOKEN"
+
+curl http://localhost:8000/api/v1/labs/LAB_ID/nodes \
+  -H "Authorization: Bearer ACCESS_TOKEN"
+
+curl -X POST http://localhost:8000/api/v1/labs/LAB_ID/destroy \
+  -H "Authorization: Bearer ACCESS_TOKEN"
+```
+
 ## Security Boundary
 
-The API container has no Docker socket mount and does not execute shell commands or Containerlab. Containerlab integration is intentionally deferred to Phase 4 and must run only through the Celery worker and a dedicated adapter.
+The API container has no Docker socket mount and does not execute shell commands or Containerlab. Containerlab operations run only through the Celery worker and `ContainerlabAdapter`. The worker has controlled host access for the MVP because Containerlab needs Docker socket and host network visibility.

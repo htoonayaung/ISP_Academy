@@ -23,7 +23,11 @@ env = [
     "INITIAL_ADMIN_FULL_NAME=Testing Admin",
     "REDIS_URL=redis://redis:6379/0",
     "CELERY_BROKER_URL=redis://redis:6379/1",
-    "CELERY_RESULT_BACKEND=redis://redis:6379/2"
+    "CELERY_RESULT_BACKEND=redis://redis:6379/2",
+    "LAB_ROOT=/tmp/isp-academy-test-labs",
+    "CONTAINERLAB_BIN=/usr/bin/containerlab",
+    "CONTAINERLAB_COMMAND_TIMEOUT_SECONDS=120",
+    "LAB_EVENT_OUTPUT_LIMIT=12000"
 ]
 
 [tool.ruff]
