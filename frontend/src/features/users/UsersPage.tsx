@@ -30,8 +30,11 @@ export function UsersPage() {
 
   async function deactivate(user: User) {
     if (!confirm(`Deactivate ${user.username}?`)) return;
-    await api(`/api/v1/users/${user.id}`, { method: "DELETE" });
-    await load();
+    try {
+      setError("");
+      await api(`/api/v1/users/${user.id}`, { method: "DELETE" });
+      await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to deactivate user"); }
   }
 
   return (

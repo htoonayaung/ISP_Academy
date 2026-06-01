@@ -17,6 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   async function loadUser() {
+    setLoading(true);
     if (!getToken()) {
       setLoading(false);
       return;
@@ -46,9 +47,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       loading,
       login: async (username, password) => {
-        const token = await loginApi(username, password);
-        setToken(token.access_token);
-        setUser(await me());
+        setLoading(true);
+        try {
+          const token = await loginApi(username, password);
+          setToken(token.access_token);
+          setUser(await me());
+        } finally {
+          setLoading(false);
+        }
       },
       logout: () => {
         clearToken();

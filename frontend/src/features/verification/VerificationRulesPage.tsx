@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { Alert } from "../../components/ui/Alert";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Table, Td, Th } from "../../components/ui/Table";
@@ -12,20 +13,39 @@ export function VerificationRulesPage() {
   const { id = "" } = useParams();
   const [rules, setRules] = useState<VerificationRule[]>([]);
   const [form, setForm] = useState({ name: "", target_node: "host1", command: "echo ok", parser_type: "SIMPLE_TEXT", assertion_type: "CONTAINS", expected_value: "ok", timeout_seconds: 5, is_active: true });
-  async function load() { setRules(await api<VerificationRule[]>(`/api/v1/tickets/${id}/verification-rules`)); }
+  const [error, setError] = useState("");
+  async function load() {
+    try { setError(""); setRules(await api<VerificationRule[]>(`/api/v1/tickets/${id}/verification-rules`)); }
+    catch (err) { setError(err instanceof Error ? err.message : "Failed to load rules"); }
+  }
   useEffect(() => { load(); }, [id]);
   async function submit(event: FormEvent) {
     event.preventDefault();
-    await api(`/api/v1/tickets/${id}/verification-rules`, { method: "POST", bodyJson: form });
-    setForm({ ...form, name: "" });
-    await load();
+    if (form.name.trim().length < 3) {
+      setError("Rule name must be at least 3 characters.");
+      return;
+    }
+    if (!form.target_node.trim() || !form.command.trim()) {
+      setError("Target node and command are required.");
+      return;
+    }
+    try {
+      setError("");
+      await api(`/api/v1/tickets/${id}/verification-rules`, { method: "POST", bodyJson: form });
+      setForm({ ...form, name: "" });
+      await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to save rule"); }
   }
   async function remove(rule: VerificationRule) {
     if (!confirm("Delete rule?")) return;
-    await api(`/api/v1/verification-rules/${rule.id}`, { method: "DELETE" });
-    await load();
+    try {
+      setError("");
+      await api(`/api/v1/verification-rules/${rule.id}`, { method: "DELETE" });
+      await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to delete rule"); }
   }
   return <div className="space-y-4"><Card title="Verification Rules">
+    {error && <div className="mb-3"><Alert message={error} /></div>}
     <form onSubmit={submit} className="mb-4 grid gap-3 md:grid-cols-3">
       <Input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
       <Input placeholder="Target node" value={form.target_node} onChange={(e) => setForm({ ...form, target_node: e.target.value })} />

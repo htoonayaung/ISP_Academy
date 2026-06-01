@@ -26,12 +26,18 @@ export function LabTemplatesPage() {
     } catch (err) { setError(err instanceof Error ? err.message : "Failed"); }
   }
   async function validate(id: string) {
-    const result = await api<ValidationResult>(`/api/v1/lab-templates/${id}/validate`, { method: "POST" });
-    setMessage(result.is_valid ? "Template is valid" : result.errors.join(", "));
+    try {
+      setError("");
+      const result = await api<ValidationResult>(`/api/v1/lab-templates/${id}/validate`, { method: "POST" });
+      setMessage(result.is_valid ? "Template is valid" : result.errors.join(", "));
+    } catch (err) { setError(err instanceof Error ? err.message : "Validation failed"); }
   }
   async function deactivate(id: string) {
     if (!confirm("Deactivate template?")) return;
-    await api(`/api/v1/lab-templates/${id}`, { method: "DELETE" }); await load();
+    try {
+      setError("");
+      await api(`/api/v1/lab-templates/${id}`, { method: "DELETE" }); await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to deactivate template"); }
   }
   return (
     <div className="space-y-4"><Card title="Lab Templates" action={<Button onClick={() => setCreating(true)}>Create template</Button>}>

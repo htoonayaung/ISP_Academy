@@ -91,6 +91,56 @@ curl http://localhost:8000/ready
 curl http://localhost:8000/api/v1/system/info
 ```
 
+## Frontend Demo Checklist
+
+Open:
+
+```text
+http://10.0.44.2:3000
+```
+
+Check these flows:
+
+- Login with the seeded admin account.
+- Dashboard shows full name, username, and role.
+- Admin sidebar shows Dashboard, Users, Lab Templates, Labs, Tickets, Verification Rules, and Attempts.
+- Instructor sidebar shows Dashboard, Lab Templates, Labs, Tickets, and Verification Rules.
+- Student sidebar shows Dashboard, Tickets, My Attempts, and My Labs.
+- Empty or invalid form submissions show an inline validation message instead of crashing the app.
+- Student ticket detail pages do not show `hidden_solution`.
+- Lab detail pages poll while labs are `STARTING`, `STOPPING`, or `DESTROYING`.
+- Attempt detail pages disable Run Verification until the linked lab is `RUNNING`.
+- Verification run detail pages poll while runs are `QUEUED` or `RUNNING`.
+
+## Frontend Troubleshooting
+
+If the dashboard profile or sidebar is blank:
+
+```javascript
+localStorage.getItem("isp_academy_token")
+```
+
+If this returns `null`, log in again. If a token exists, check:
+
+```bash
+curl http://10.0.44.2:8000/api/v1/auth/me \
+  -H "Authorization: Bearer ACCESS_TOKEN"
+```
+
+The expected response shape is:
+
+```json
+{"user":{"username":"admin","role":"ADMIN"}}
+```
+
+If the browser shows validation errors such as `String should have at least...`, the frontend should now display that message inline on the relevant page.
+
+## MVP Frontend Security Notes
+
+The Phase 7 frontend stores the JWT access token in browser `localStorage` under `isp_academy_token`. This is acceptable for the MVP demo, but it is not the final production session model. A later hardening phase should move authentication to a more defensive strategy, such as short-lived access tokens with refresh flow or httpOnly secure cookies.
+
+The frontend is served over HTTP in this MVP deployment unless HTTPS is configured separately at the reverse-proxy layer. Do not use production credentials over untrusted networks.
+
 ## Auth Checks
 
 ```bash

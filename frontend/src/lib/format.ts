@@ -12,7 +12,7 @@ export function canStopLab(status: string): boolean {
 }
 
 export function canDestroyLab(status: string): boolean {
-  return !["DESTROYING", "DESTROYED"].includes(status);
+  return !["STARTING", "STOPPING", "DESTROYING", "DESTROYED"].includes(status);
 }
 
 export function statusTone(status: string): "green" | "red" | "yellow" | "gray" | "blue" {

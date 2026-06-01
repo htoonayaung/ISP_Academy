@@ -16,6 +16,7 @@ import { TicketDetailPage } from "../features/tickets/TicketDetailPage";
 import { TicketsPage } from "../features/tickets/TicketsPage";
 import { UsersPage } from "../features/users/UsersPage";
 import { VerificationRulesPage } from "../features/verification/VerificationRulesPage";
+import { VerificationRulesIndexPage } from "../features/verification/VerificationRulesIndexPage";
 import { VerificationRunPage } from "../features/verification/VerificationRunPage";
 
 export function App() {
@@ -33,14 +34,17 @@ export function App() {
           <Route element={<RoleRoute roles={["ADMIN", "INSTRUCTOR"]} />}>
             <Route path="/lab-templates" element={<LabTemplatesPage />} />
             <Route path="/lab-templates/:id" element={<LabTemplateDetailPage />} />
+            <Route path="/verification-rules" element={<VerificationRulesIndexPage />} />
             <Route path="/tickets/:id/verification-rules" element={<VerificationRulesPage />} />
           </Route>
           <Route path="/labs" element={<MyLabsPage />} />
           <Route path="/labs/:id" element={<LabDetailPage />} />
           <Route path="/tickets" element={<TicketsPage />} />
           <Route path="/tickets/:id" element={<TicketDetailPage />} />
-          <Route element={<RoleRoute roles={["STUDENT"]} />}>
+          <Route element={<RoleRoute roles={["ADMIN", "STUDENT"]} />}>
             <Route path="/attempts" element={<MyAttemptsPage />} />
+          </Route>
+          <Route element={<RoleRoute roles={["STUDENT"]} />}>
             <Route path="/attempts/:id" element={<AttemptDetailPage />} />
             <Route path="/verification-runs/:id" element={<VerificationRunPage />} />
           </Route>

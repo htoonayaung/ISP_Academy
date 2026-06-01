@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { Alert } from "../../components/ui/Alert";
+import { Spinner } from "../../components/ui/Spinner";
 import { Table, Td, Th } from "../../components/ui/Table";
 import { api } from "../../lib/api";
 import { Lab } from "../../types/lab";
@@ -15,24 +17,29 @@ export function AttemptDetailPage() {
   const [lab, setLab] = useState<Lab | null>(null);
   const [runs, setRuns] = useState<VerificationRun[]>([]);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   async function load() {
-    const current = await api<TicketAttempt>(`/api/v1/my/attempts/${id}`);
-    setAttempt(current);
-    setLab(await api<Lab>(`/api/v1/labs/${current.lab_instance_id}`));
-    setRuns(await api<VerificationRun[]>(`/api/v1/my/attempts/${id}/verification-runs`));
+    try {
+      setError("");
+      const current = await api<TicketAttempt>(`/api/v1/my/attempts/${id}`);
+      setAttempt(current);
+      setLab(await api<Lab>(`/api/v1/labs/${current.lab_instance_id}`));
+      setRuns(await api<VerificationRun[]>(`/api/v1/my/attempts/${id}/verification-runs`));
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to load attempt"); }
   }
   useEffect(() => { load(); }, [id]);
   useEffect(() => {
-    if (!runs.some((run) => ["QUEUED", "RUNNING"].includes(run.status))) return;
+    if (!runs.some((run) => ["QUEUED", "RUNNING"].includes(run.status)) && !["STARTING", "STOPPING", "DESTROYING"].includes(lab?.status || "")) return;
     const timer = setInterval(load, 3000);
     return () => clearInterval(timer);
-  }, [runs.map((run) => run.status).join(",")]);
+  }, [runs.map((run) => run.status).join(","), lab?.status]);
   async function verify() {
     setMessage("");
     try { await api(`/api/v1/my/attempts/${id}/verify`, { method: "POST" }); await load(); } catch (err) { setMessage(err instanceof Error ? err.message : "Verification failed"); }
   }
-  if (!attempt || !lab) return null;
+  if (!attempt || !lab) return error ? <Alert message={error} /> : <Spinner />;
   return <div className="space-y-4">
+    {error && <Alert message={error} />}
     <Card title={`Attempt ${attempt.id.slice(0, 8)}`} action={<Badge value={attempt.status} />}>
       <div className="flex flex-wrap items-center gap-3"><Link className="text-teal-700" to={`/labs/${lab.id}`}>Open linked lab</Link><Badge value={lab.status} /></div>
       {lab.status !== "RUNNING" && <p className="mt-3 text-sm text-amber-700">Start the lab before running verification.</p>}

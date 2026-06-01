@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Button } from "../../components/ui/Button";
+import { Alert } from "../../components/ui/Alert";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Textarea } from "../../components/ui/Textarea";
@@ -27,12 +28,23 @@ export function LabTemplateForm({ template, onSubmit }: { template?: LabTemplate
     estimated_duration_minutes: template?.estimated_duration_minutes || 30,
     is_active: template?.is_active || false
   });
+  const [error, setError] = useState("");
   async function submit(event: FormEvent) {
     event.preventDefault();
+    setError("");
+    if (data.name.trim().length < 3) {
+      setError("Template name must be at least 3 characters.");
+      return;
+    }
+    if (!data.description.trim() || !data.containerlab_yaml.trim()) {
+      setError("Description and Containerlab YAML are required.");
+      return;
+    }
     await onSubmit({ ...data, default_startup_config: data.default_startup_config || null });
   }
   return (
     <form onSubmit={submit} className="grid gap-3">
+      {error && <Alert message={error} />}
       <Input placeholder="Name" value={data.name} onChange={(e) => setData({ ...data, name: e.target.value })} />
       <Textarea placeholder="Description" value={data.description} onChange={(e) => setData({ ...data, description: e.target.value })} />
       <div className="grid gap-3 md:grid-cols-3">

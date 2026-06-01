@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Button } from "../../components/ui/Button";
+import { Alert } from "../../components/ui/Alert";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { Role, User } from "../../types/auth";
@@ -13,9 +14,23 @@ export function UserForm({ user, onSubmit }: { user?: User; onSubmit: (data: Rec
     role: user?.role || "STUDENT",
     is_active: user?.is_active ?? true
   });
+  const [error, setError] = useState("");
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    setError("");
+    if (data.username.trim().length < 3) {
+      setError("Username must be at least 3 characters.");
+      return;
+    }
+    if (!data.email.trim() || !data.full_name.trim()) {
+      setError("Email and full name are required.");
+      return;
+    }
+    if (!user && data.password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
     const payload: Record<string, unknown> = { ...data };
     if (user && !data.password) delete payload.password;
     await onSubmit(payload);
@@ -23,6 +38,7 @@ export function UserForm({ user, onSubmit }: { user?: User; onSubmit: (data: Rec
 
   return (
     <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
+      {error && <div className="md:col-span-2"><Alert message={error} /></div>}
       <Input placeholder="Email" value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })} />
       <Input placeholder="Username" value={data.username} onChange={(e) => setData({ ...data, username: e.target.value })} />
       <Input placeholder={user ? "New password" : "Password"} type="password" value={data.password} onChange={(e) => setData({ ...data, password: e.target.value })} />

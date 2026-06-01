@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
+import { Alert } from "../../components/ui/Alert";
+import { Spinner } from "../../components/ui/Spinner";
 import { api } from "../../lib/api";
 import { Ticket, TicketAttempt } from "../../types/ticket";
 import { useAuth } from "../auth/authStore";
@@ -12,13 +14,22 @@ export function TicketDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [ticket, setTicket] = useState<Ticket | null>(null);
-  useEffect(() => { api<Ticket>(`/api/v1/tickets/${id}`).then(setTicket); }, [id]);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    api<Ticket>(`/api/v1/tickets/${id}`)
+      .then(setTicket)
+      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load ticket"));
+  }, [id]);
   async function start() {
-    const attempt = await api<TicketAttempt>(`/api/v1/tickets/${id}/start`, { method: "POST" });
-    navigate(`/attempts/${attempt.id}`);
+    try {
+      setError("");
+      const attempt = await api<TicketAttempt>(`/api/v1/tickets/${id}/start`, { method: "POST" });
+      navigate(`/attempts/${attempt.id}`);
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to start attempt"); }
   }
-  if (!ticket) return null;
+  if (!ticket) return error ? <Alert message={error} /> : <Spinner />;
   return <Card title={ticket.title} action={<Badge value={ticket.status} />}>
+    {error && <div className="mb-3"><Alert message={error} /></div>}
     <p className="mb-3 text-sm text-slate-600">{ticket.description}</p>
     <h3 className="mb-1 font-semibold">Instructions</h3><p className="mb-3 whitespace-pre-wrap text-sm">{ticket.student_instructions}</p>
     {ticket.hints && <><h3 className="mb-1 font-semibold">Hints</h3><p className="mb-3 whitespace-pre-wrap text-sm">{ticket.hints}</p></>}
