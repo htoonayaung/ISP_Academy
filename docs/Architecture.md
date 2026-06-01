@@ -59,7 +59,11 @@ FastAPI routes must never call Containerlab directly.
 
 The API container must never have direct Containerlab binary access, Docker socket access, or host-level lab execution privileges.
 
+In the MVP Docker Compose deployment, the API container must also avoid privileged mode, host networking, and host PID mode. Those host-level privileges are reserved for the Celery worker only.
+
 Only the Celery worker may execute Containerlab operations, and it must do so through the Containerlab Adapter.
+
+The current worker privilege setup is MVP-only technical debt. It is acceptable for the single-server pilot because Containerlab requires Docker and host network visibility, but it must be revisited before broader deployment.
 
 Correct flow:
 
@@ -208,4 +212,3 @@ Possible future additions:
 - CI/CD and production hardening.
 
 These are not Phase 0 or Phase 1 implementation targets.
-

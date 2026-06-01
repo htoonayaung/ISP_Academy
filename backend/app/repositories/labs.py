@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.models.lab_instance import LabEvent, LabInstance, LabNode
 
 
@@ -36,6 +37,11 @@ class LabRepository:
         return lab
 
     async def add_event(self, event: LabEvent) -> LabEvent:
+        output_limit = get_settings().lab_event_output_limit
+        if event.stdout is not None:
+            event.stdout = self._limit_output(event.stdout, output_limit)
+        if event.stderr is not None:
+            event.stderr = self._limit_output(event.stderr, output_limit)
         self.session.add(event)
         await self.session.flush()
         await self.session.refresh(event)
@@ -63,3 +69,9 @@ class LabRepository:
 
     async def refresh(self, lab: LabInstance) -> None:
         await self.session.refresh(lab)
+
+    @staticmethod
+    def _limit_output(value: str, output_limit: int) -> str:
+        if len(value) <= output_limit:
+            return value
+        return value[:output_limit] + "\n[output truncated]"

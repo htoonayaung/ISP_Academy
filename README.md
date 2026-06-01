@@ -109,4 +109,13 @@ curl -X POST http://localhost:8000/api/v1/labs/LAB_ID/destroy \
 
 ## Security Boundary
 
-The API container has no Docker socket mount and does not execute shell commands or Containerlab. Containerlab operations run only through the Celery worker and `ContainerlabAdapter`. The worker has controlled host access for the MVP because Containerlab needs Docker socket and host network visibility.
+The API container has no Docker socket mount and does not execute shell commands or Containerlab. It must not run privileged, use host networking, or use host PID mode.
+
+Containerlab operations run only through the Celery worker and `ContainerlabAdapter`. For this single-server MVP, the worker has controlled host access because Containerlab needs Docker socket and host network visibility:
+
+- `celery_worker` has `/var/run/docker.sock`.
+- `celery_worker` runs privileged.
+- `celery_worker` uses host network and host PID mode.
+- `backend` API has none of those privileges.
+
+This worker privilege model is MVP-only technical debt. Before any broader deployment, isolate the lab executor further and replace broad worker privileges with a narrower host-side execution boundary.

@@ -79,7 +79,7 @@ async def get_lab_status(
     service: LabService = Depends(get_lab_service),
 ) -> LabStatusRead:
     lab = await service.get_lab(current_user, lab_id)
-    return LabStatusRead(id=lab.id, status=lab.status, last_error=lab.last_error)
+    return service.shape_lab_status(current_user, lab)
 
 
 @router.get("/{lab_id}/nodes", response_model=list[LabNodeRead])

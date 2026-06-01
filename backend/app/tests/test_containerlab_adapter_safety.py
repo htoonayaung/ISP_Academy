@@ -49,6 +49,9 @@ def test_api_container_has_no_docker_socket_mount() -> None:
     backend_block = compose.split("  celery_worker:", 1)[0]
 
     assert "/var/run/docker.sock" not in backend_block
+    assert "privileged: true" not in backend_block
+    assert "network_mode: host" not in backend_block
+    assert "pid: host" not in backend_block
 
 
 def test_status_parser_handles_containerlab_lab_name_map() -> None:

@@ -10,7 +10,7 @@ from app.models.lab_instance import LabEvent, LabInstance, LabInstanceStatus, La
 from app.models.user import User, UserRole
 from app.repositories.lab_templates import LabTemplateRepository
 from app.repositories.labs import LabRepository
-from app.schemas.lab_instance import LabCreate
+from app.schemas.lab_instance import LabCreate, LabStatusRead
 
 
 class LabService:
@@ -145,7 +145,16 @@ class LabService:
 
     async def list_events(self, actor: User, lab_id: uuid.UUID) -> list[LabEvent]:
         lab = await self.get_lab(actor, lab_id)
-        return await self.repository.list_events(lab.id)
+        events = await self.repository.list_events(lab.id)
+        if actor.role == UserRole.STUDENT:
+            return [self._student_safe_event(event) for event in events]
+        return events
+
+    def shape_lab_status(self, actor: User, lab: LabInstance) -> LabStatusRead:
+        last_error = lab.last_error
+        if actor.role == UserRole.STUDENT and last_error:
+            last_error = "Lab operation failed. Ask an instructor to review lab events."
+        return LabStatusRead(id=lab.id, status=lab.status, last_error=last_error)
 
     async def set_failed(self, lab: LabInstance, message: str, stdout: str | None, stderr: str | None) -> None:
         lab.status = LabInstanceStatus.FAILED.value
@@ -168,6 +177,25 @@ class LabService:
         if lab.owner_id == actor.id:
             return
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
+    @staticmethod
+    def _student_safe_event(event: LabEvent) -> LabEvent:
+        return LabEvent(
+            id=event.id,
+            lab_instance_id=event.lab_instance_id,
+            event_type=event.event_type,
+            message=LabService._student_safe_message(event),
+            stdout=None,
+            stderr=None,
+            created_by=event.created_by,
+            created_at=event.created_at,
+        )
+
+    @staticmethod
+    def _student_safe_message(event: LabEvent) -> str:
+        if event.event_type == "LAB_FAILED":
+            return "Lab operation failed. Ask an instructor to review details."
+        return event.message
 
     @staticmethod
     def _render_lab_yaml(raw_yaml: str, lab_name: str) -> str:

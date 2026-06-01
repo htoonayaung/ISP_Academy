@@ -37,7 +37,7 @@ async def _start_lab(lab_id: uuid.UUID, actor_id: uuid.UUID | None) -> None:
     async with async_session_factory() as session:
         repository = LabRepository(session)
         lab = await repository.get_by_id(lab_id)
-        if lab is None:
+        if lab is None or lab.status != LabInstanceStatus.STARTING.value:
             return
         adapter = ContainerlabAdapter()
         result = adapter.deploy(lab)
@@ -59,7 +59,7 @@ async def _stop_lab(lab_id: uuid.UUID, actor_id: uuid.UUID | None) -> None:
     async with async_session_factory() as session:
         repository = LabRepository(session)
         lab = await repository.get_by_id(lab_id)
-        if lab is None:
+        if lab is None or lab.status != LabInstanceStatus.STOPPING.value:
             return
         adapter = ContainerlabAdapter()
         result = adapter.destroy(lab)
@@ -79,7 +79,7 @@ async def _destroy_lab(lab_id: uuid.UUID, actor_id: uuid.UUID | None) -> None:
     async with async_session_factory() as session:
         repository = LabRepository(session)
         lab = await repository.get_by_id(lab_id)
-        if lab is None:
+        if lab is None or lab.status != LabInstanceStatus.DESTROYING.value:
             return
         adapter = ContainerlabAdapter()
         result = adapter.destroy(lab)
