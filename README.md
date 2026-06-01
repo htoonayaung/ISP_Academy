@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-Phase 4 implements the Containerlab lab engine for MVP lab instances.
+Phase 5 implements the basic ticket-based learning flow.
 
 ## Current Scope
 
@@ -21,6 +21,8 @@ Included:
 - Lab instance lifecycle APIs.
 - Worker-only Containerlab deploy, inspect, and destroy operations.
 - Lab nodes and lab event history.
+- Ticket management linked to lab templates.
+- Student ticket attempts that create LabInstances in `CREATED` state.
 - pytest tests for foundation, auth, users, lab templates, labs, lifecycle, and adapter safety.
 
 Excluded:
@@ -47,7 +49,7 @@ cd /opt/isp-academy/deployments
 docker compose exec backend alembic upgrade head
 ```
 
-Phase 4 creates `users`, `lab_templates`, `lab_instances`, `lab_nodes`, and `lab_events`.
+Phase 5 creates `users`, `lab_templates`, `lab_instances`, `lab_nodes`, `lab_events`, `tickets`, and `ticket_attempts`.
 
 ## Seed Initial Admin
 
@@ -91,6 +93,37 @@ curl -X POST http://localhost:8000/api/v1/labs \
   -H "Authorization: Bearer ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"template_id":"LAB_TEMPLATE_ID"}'
+```
+
+## Ticket Checks
+
+```bash
+curl -X POST http://localhost:8000/api/v1/tickets \
+  -H "Authorization: Bearer ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lab_template_id": "LAB_TEMPLATE_ID",
+    "title": "Basic ISP Troubleshooting",
+    "description": "Find and fix the reported issue.",
+    "student_instructions": "Use the lab topology and diagnose the fault.",
+    "hints": "Start with interface and routing status.",
+    "hidden_solution": "Instructor-only solution text.",
+    "status": "DRAFT"
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8000/api/v1/tickets/TICKET_ID/publish \
+  -H "Authorization: Bearer ACCESS_TOKEN"
+
+curl http://localhost:8000/api/v1/tickets \
+  -H "Authorization: Bearer STUDENT_ACCESS_TOKEN"
+
+curl -X POST http://localhost:8000/api/v1/tickets/TICKET_ID/start \
+  -H "Authorization: Bearer STUDENT_ACCESS_TOKEN"
+
+curl http://localhost:8000/api/v1/my/attempts \
+  -H "Authorization: Bearer STUDENT_ACCESS_TOKEN"
 ```
 
 ```bash

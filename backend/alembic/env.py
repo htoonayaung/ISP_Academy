@@ -9,6 +9,7 @@ from app.core.config import get_settings
 from app.db.base import Base
 from app.models import lab_instance  # noqa: F401
 from app.models import lab_template  # noqa: F401
+from app.models import ticket  # noqa: F401
 from app.models import user  # noqa: F401
 
 config = context.config

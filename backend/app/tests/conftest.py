@@ -10,6 +10,7 @@ from app.core.security import hash_password
 from app.db.base import Base
 from app.models.lab_instance import LabEvent, LabInstance, LabNode  # noqa: F401
 from app.models.lab_template import LabTemplate
+from app.models.ticket import Ticket, TicketAttempt  # noqa: F401
 from app.main import app
 from app.models.user import User, UserRole
 
