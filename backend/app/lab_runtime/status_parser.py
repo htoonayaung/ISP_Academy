@@ -12,13 +12,14 @@ def parse_containerlab_nodes(lab_id: Any, payload: Any) -> list[LabNode]:
         name = str(row.get("name") or row.get("Name") or row.get("node") or row.get("Node") or "")
         if not name:
             continue
+        container_name = row.get("container_name") or row.get("Container Name") or row.get("container") or name
         nodes.append(
             LabNode(
                 lab_instance_id=lab_id,
-                name=name,
+                name=_short_node_name(str(row.get("lab_name") or row.get("Lab Name") or ""), name),
                 kind=str(row.get("kind") or row.get("Kind") or "unknown"),
                 role=row.get("role") or row.get("Role"),
-                container_name=row.get("container_name") or row.get("Container Name") or row.get("container"),
+                container_name=container_name,
                 management_ipv4=row.get("ipv4_address") or row.get("IPv4 Address") or row.get("mgmt_ipv4"),
                 status=str(row.get("state") or row.get("State") or row.get("status") or "UNKNOWN"),
             )
@@ -39,3 +40,10 @@ def _extract_rows(payload: Any) -> list[Any]:
                 return value
         return [payload]
     return []
+
+
+def _short_node_name(lab_name: str, container_name: str) -> str:
+    prefix = f"clab-{lab_name}-"
+    if lab_name and container_name.startswith(prefix):
+        return container_name.removeprefix(prefix)
+    return container_name

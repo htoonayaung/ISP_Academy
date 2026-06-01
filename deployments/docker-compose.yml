@@ -38,6 +38,7 @@ services:
     volumes:
       - /opt/isp-academy/lab-storage:/opt/isp-academy/lab-storage
       - /usr/bin/containerlab:/usr/bin/containerlab:ro
+      - /usr/bin/docker:/usr/bin/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock
     command: ["celery", "-A", "app.workers.celery_app.celery_app", "worker", "--loglevel=INFO"]
     restart: unless-stopped

@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-Phase 5 implements the basic ticket-based learning flow.
+Phase 6 implements the basic verification engine.
 
 ## Current Scope
 
@@ -23,6 +23,9 @@ Included:
 - Lab nodes and lab event history.
 - Ticket management linked to lab templates.
 - Student ticket attempts that create LabInstances in `CREATED` state.
+- Instructor-defined verification rules for tickets.
+- Student verification runs against own running lab attempts.
+- Verification results with safe pass/fail output.
 - pytest tests for foundation, auth, users, lab templates, labs, lifecycle, and adapter safety.
 
 Excluded:
@@ -49,7 +52,7 @@ cd /opt/isp-academy/deployments
 docker compose exec backend alembic upgrade head
 ```
 
-Phase 5 creates `users`, `lab_templates`, `lab_instances`, `lab_nodes`, `lab_events`, `tickets`, and `ticket_attempts`.
+Phase 6 creates `users`, `lab_templates`, `lab_instances`, `lab_nodes`, `lab_events`, `tickets`, `ticket_attempts`, `verification_rules`, `verification_runs`, and `verification_results`.
 
 ## Seed Initial Admin
 
@@ -123,6 +126,35 @@ curl -X POST http://localhost:8000/api/v1/tickets/TICKET_ID/start \
   -H "Authorization: Bearer STUDENT_ACCESS_TOKEN"
 
 curl http://localhost:8000/api/v1/my/attempts \
+  -H "Authorization: Bearer STUDENT_ACCESS_TOKEN"
+```
+
+## Verification Checks
+
+```bash
+curl -X POST http://localhost:8000/api/v1/tickets/TICKET_ID/verification-rules \
+  -H "Authorization: Bearer ADMIN_OR_OWNER_INSTRUCTOR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Check node output",
+    "target_node": "host1",
+    "command": "echo ok",
+    "parser_type": "SIMPLE_TEXT",
+    "assertion_type": "CONTAINS",
+    "expected_value": "ok",
+    "timeout_seconds": 5,
+    "is_active": true
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8000/api/v1/my/attempts/ATTEMPT_ID/verify \
+  -H "Authorization: Bearer STUDENT_ACCESS_TOKEN"
+
+curl http://localhost:8000/api/v1/my/attempts/ATTEMPT_ID/verification-runs \
+  -H "Authorization: Bearer STUDENT_ACCESS_TOKEN"
+
+curl http://localhost:8000/api/v1/my/verification-runs/RUN_ID \
   -H "Authorization: Bearer STUDENT_ACCESS_TOKEN"
 ```
 
