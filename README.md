@@ -23,8 +23,9 @@ Not included yet:
 
 - AI Mentor.
 - Web terminal.
-- Certification, leaderboard, or analytics.
-- Kubernetes, HA, or multi-tenant enterprise features.
+- Certification, leaderboard, analytics.
+- Production hardening.
+- Advanced topology editor.
 
 ## URLs
 
@@ -52,25 +53,35 @@ Seed the initial admin:
 docker compose -f deployments/docker-compose.yml exec backend python -m app.scripts.seed_admin
 ```
 
-## Demo Flow
+## Manual Lab Template Demo Flow
 
 1. Admin logs in.
 2. Admin creates instructor and student accounts.
-3. Admin or instructor generates an AI Lab Builder preview, or manually creates a lab template.
-4. Review AI validation, approve the preview into an inactive lab template, then activate/edit the template if needed.
-5. Validate the template.
-6. Create a ticket from the template.
-7. Add hints and instructor-only hidden solution.
-8. Publish the ticket.
-9. Create verification rules.
-10. Student logs in.
-11. Student opens the published ticket.
-12. Student starts an attempt.
-13. Student opens the linked lab.
-14. Student starts the lab and waits for `RUNNING`.
-15. Student runs verification.
-16. Student opens the verification run result.
-17. Student destroys the lab.
+3. Admin or instructor creates a lab template.
+4. Admin or instructor validates the template.
+5. Admin or instructor creates a ticket from the template.
+6. Admin or instructor adds hints and instructor-only hidden solution.
+7. Admin or instructor publishes the ticket.
+8. Admin or instructor creates verification rules.
+9. Student logs in.
+10. Student opens the published ticket.
+11. Student starts an attempt.
+12. Student opens the linked lab.
+13. Student starts the lab and waits for `RUNNING`.
+14. Student runs verification.
+15. Student opens the verification run result.
+16. Student destroys the lab.
+
+## AI Lab Builder Demo Flow
+
+1. Admin or instructor opens AI Lab Builder.
+2. Admin or instructor enters a prompt and generates a preview.
+3. Admin or instructor reviews validation status, generated Containerlab YAML, generated configs, and verification rule previews.
+4. Admin or instructor approves the preview.
+5. Approval creates an inactive `LabTemplate`.
+6. Admin or instructor edits or activates the template if needed.
+7. Admin or instructor validates the template.
+8. Continue with the manual ticket, verification rule, student attempt, lab start, verification, and lab destroy flow.
 
 Full checklist: [docs/DemoGuide.md](docs/DemoGuide.md)
 
@@ -100,7 +111,7 @@ curl http://10.0.44.2:8000/api/v1/system/info
 
 ## AI Lab Builder V1
 
-AI Lab Builder is disabled by default. Enable it only when an AI provider is configured, or use the `mock` provider for local/demo testing:
+AI Lab Builder v1 is included in Phase 8. The current MVP demo server uses the `mock` provider:
 
 ```env
 AI_LAB_BUILDER_ENABLED=true
@@ -112,6 +123,8 @@ AI_REQUEST_TIMEOUT_SECONDS=30
 AI_MAX_TOKENS=4000
 ```
 
+For real provider testing, keep `AI_PROVIDER=openai_compatible` and configure `AI_API_BASE_URL`, `AI_API_KEY`, and `AI_MODEL` in the server environment. Do not commit real AI keys.
+
 Open the frontend as Admin or Instructor:
 
 - `http://10.0.44.2:3000/ai-lab-builder`
@@ -120,8 +133,10 @@ Open the frontend as Admin or Instructor:
 Phase 8 behavior:
 
 - AI output is stored only as a preview first.
+- AI output is untrusted.
 - Backend validation is mandatory.
 - Approval creates an inactive `LabTemplate`.
+- There is no auto-deploy.
 - Approval does not create, start, inspect, stop, or destroy a lab.
 - Students cannot access AI Lab Builder routes or menus.
 
@@ -141,6 +156,14 @@ cd /opt/isp-academy
 bash scripts/restore_database.sh backups/isp_academy_YYYYmmdd_HHMMSS.dump
 ```
 
+Use the real filename from the `backups/` directory:
+
+```bash
+bash scripts/restore_database.sh backups/<filename>.dump
+```
+
+Backup artifacts matching `backups/*.dump` and `backups/*.sql` are gitignored.
+
 See [docs/BackupRestore.md](docs/BackupRestore.md).
 
 ## Git Tag Suggestion
@@ -149,7 +172,7 @@ After verifying the demo:
 
 ```bash
 cd /opt/isp-academy
-git tag phase-7.5-demo-ready
+git tag phase-8-ai-lab-builder-ready
 ```
 
 Review staged files before pushing. Do not commit real secrets or real environment files.
@@ -173,7 +196,7 @@ Before broader deployment, replace this with a narrower lab executor boundary.
 - JWT is stored in browser `localStorage`.
 - HTTP is used unless HTTPS is configured externally.
 - `celery_worker` has privileged host access for Containerlab.
-- AI Lab Builder v1 has a simple OpenAI-compatible provider abstraction and mock provider only.
+- AI Lab Builder v1 exists with mock provider and OpenAI-compatible provider abstraction. Real AI provider testing is pending.
 - AI-generated FRR startup configs are previewed, not automatically wired into full lab deployment.
 - No AI Mentor yet.
 - No production hardening yet.

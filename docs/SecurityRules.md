@@ -69,6 +69,7 @@ Rules:
 - Do not send hidden solutions to AI provider.
 - Do not allow AI to generate arbitrary shell commands.
 - Do not allow unsupported node kinds, images, host mounts, external networks, or production IP targets.
+- Do not allow privileged containers from AI-generated content.
 - AI Lab Builder endpoints are Admin/Instructor only.
 - Approval creates an inactive `LabTemplate` only.
 - Approval must never create or start a `LabInstance`.

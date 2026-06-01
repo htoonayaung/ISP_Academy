@@ -4,7 +4,7 @@
 
 AI Lab Builder v1 helps Admin and Instructor users generate a safe lab preview from a natural language prompt.
 
-It is a preview and approval workflow only. It does not deploy Containerlab, create a `LabInstance`, or run verification.
+It is a preview and approval workflow only. It does not deploy Containerlab, create a `LabInstance`, start a lab, or run verification.
 
 ## Access
 
@@ -26,6 +26,7 @@ Blocked:
 5. Approve the preview if validation passes.
 6. The system creates an inactive `LabTemplate`.
 7. Review, edit, validate, and activate the template before using it in tickets.
+8. Continue with the normal ticket, verification rule, student attempt, lab start, verification, and lab destroy workflow.
 
 ## MVP Limits
 
@@ -43,6 +44,7 @@ Blocked:
 - Backend validates every generated LabPlan.
 - Approval re-runs validation.
 - Approval creates an inactive lab template only.
+- Approval does not create or start a lab.
 - AI Builder never starts Containerlab.
 - AI Builder never creates lab instances.
 - Students cannot use AI Builder.
@@ -51,7 +53,7 @@ Blocked:
 
 ## Environment
 
-The feature is disabled by default.
+The feature is disabled by default in examples.
 
 ```env
 AI_LAB_BUILDER_ENABLED=false
@@ -63,12 +65,26 @@ AI_REQUEST_TIMEOUT_SECONDS=30
 AI_MAX_TOKENS=4000
 ```
 
-For MVP demo without an external provider:
+For the current MVP demo without an external provider:
 
 ```env
 AI_LAB_BUILDER_ENABLED=true
 AI_PROVIDER=mock
 ```
+
+For real provider testing:
+
+```env
+AI_LAB_BUILDER_ENABLED=true
+AI_PROVIDER=openai_compatible
+AI_API_BASE_URL=https://provider.example/v1
+AI_API_KEY=<set-on-server-only>
+AI_MODEL=<provider-model-name>
+AI_REQUEST_TIMEOUT_SECONDS=30
+AI_MAX_TOKENS=4000
+```
+
+Never commit real `AI_API_KEY` values.
 
 ## Troubleshooting
 
