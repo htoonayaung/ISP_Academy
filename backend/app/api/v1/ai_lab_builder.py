@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.adapters.ai_provider import build_ai_provider
+from app.adapters.ai_provider import build_ai_provider, build_ai_provider_config
 from app.api.deps import get_db_session
 from app.core.config import get_settings
 from app.core.permissions import get_current_user
@@ -11,7 +11,12 @@ from app.models.ai import AILabBuilderPreview
 from app.models.user import User
 from app.repositories.ai import AILabBuilderPreviewRepository
 from app.repositories.lab_templates import LabTemplateRepository
-from app.schemas.ai import AILabBuilderApprovalRead, AILabBuilderPreviewCreate, AILabBuilderPreviewRead
+from app.schemas.ai import (
+    AILabBuilderApprovalRead,
+    AILabBuilderPreviewCreate,
+    AILabBuilderPreviewRead,
+    AIProviderStatusRead,
+)
 from app.services.ai_lab_builder_service import AILabBuilderService
 
 router = APIRouter(tags=["ai-lab-builder"])
@@ -19,12 +24,22 @@ router = APIRouter(tags=["ai-lab-builder"])
 
 def get_ai_lab_builder_service(session: AsyncSession = Depends(get_db_session)) -> AILabBuilderService:
     settings = get_settings()
+    provider_config = build_ai_provider_config(settings)
     return AILabBuilderService(
         repository=AILabBuilderPreviewRepository(session),
         template_repository=LabTemplateRepository(session),
         provider=build_ai_provider(settings),
+        provider_config=provider_config,
         enabled=settings.ai_lab_builder_enabled,
     )
+
+
+@router.get("/provider/status", response_model=AIProviderStatusRead)
+async def get_ai_provider_status(
+    current_user: User = Depends(get_current_user),
+    service: AILabBuilderService = Depends(get_ai_lab_builder_service),
+) -> dict:
+    return await service.provider_status(current_user)
 
 
 @router.post("/preview", response_model=AILabBuilderPreviewRead, status_code=status.HTTP_201_CREATED)
@@ -33,7 +48,11 @@ async def create_ai_lab_preview(
     current_user: User = Depends(get_current_user),
     service: AILabBuilderService = Depends(get_ai_lab_builder_service),
 ) -> AILabBuilderPreview:
-    return await service.create_preview(current_user, payload.prompt)
+    return await service.create_preview(
+        current_user,
+        payload.prompt,
+        payload.confirm_real_provider_usage,
+    )
 
 
 @router.get("/previews", response_model=list[AILabBuilderPreviewRead])

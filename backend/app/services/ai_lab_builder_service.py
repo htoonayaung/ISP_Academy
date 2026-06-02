@@ -1,10 +1,10 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, time
 from typing import Any
 
 from fastapi import HTTPException, status
 
-from app.adapters.ai_provider import AIProvider
+from app.adapters.ai_provider import AIProvider, AIProviderConfig, AIProviderConfigurationError, AIProviderResponseError
 from app.lab_runtime.name_sanitizer import slugify
 from app.models.ai import (
     AILabBuilderPreview,
@@ -30,6 +30,7 @@ class AILabBuilderService:
         repository: AILabBuilderPreviewRepository,
         template_repository: LabTemplateRepository,
         provider: AIProvider,
+        provider_config: AIProviderConfig,
         enabled: bool,
         validator: LabPlanValidator | None = None,
         yaml_generator: ContainerlabYamlGenerator | None = None,
@@ -40,6 +41,7 @@ class AILabBuilderService:
         self.repository = repository
         self.template_repository = template_repository
         self.provider = provider
+        self.provider_config = provider_config
         self.enabled = enabled
         self.validator = validator or LabPlanValidator()
         self.yaml_generator = yaml_generator or ContainerlabYamlGenerator()
@@ -47,10 +49,21 @@ class AILabBuilderService:
         self.rule_generator = rule_generator or VerificationRulePreviewGenerator()
         self.explanation_generator = explanation_generator or LabPreviewExplanationGenerator()
 
-    async def create_preview(self, actor: User, prompt: str) -> AILabBuilderPreview:
+    async def create_preview(
+        self,
+        actor: User,
+        prompt: str,
+        confirm_real_provider_usage: bool = False,
+    ) -> AILabBuilderPreview:
         self._require_admin_or_instructor(actor)
         self._require_enabled()
-        raw_plan = await self.provider.generate_lab_plan(prompt)
+        await self._enforce_real_provider_guards(actor, confirm_real_provider_usage)
+        try:
+            raw_plan = await self.provider.generate_lab_plan(prompt)
+        except AIProviderConfigurationError as exc:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
+        except AIProviderResponseError as exc:
+            return await self._store_invalid_preview(actor, prompt, [str(exc)])
         validation = self.validator.validate_raw(raw_plan)
         generated_yaml = ""
         configs: list[dict[str, Any]] = []
@@ -91,6 +104,23 @@ class AILabBuilderService:
         await self.repository.commit()
         await self.repository.refresh(created)
         return created
+
+    async def provider_status(self, actor: User) -> dict[str, Any]:
+        if actor.role != UserRole.ADMIN:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        return {
+            "enabled": self.provider_config.enabled,
+            "provider": self.provider_config.provider,
+            "model": self.provider_config.model,
+            "base_url_host_only": self.provider_config.base_url_host_only,
+            "has_api_key": self.provider_config.has_api_key,
+            "provider_test_enabled": self.provider_config.provider_test_enabled,
+            "daily_preview_limit_per_user": self.provider_config.daily_preview_limit_per_user,
+            "real_provider_confirmation_required": (
+                self.provider_config.is_real_provider
+                and self.provider_config.real_provider_confirmation_required
+            ),
+        }
 
     async def list_previews(self, actor: User) -> list[AILabBuilderPreview]:
         self._require_admin_or_instructor(actor)
@@ -180,6 +210,39 @@ class AILabBuilderService:
     def _require_enabled(self) -> None:
         if not self.enabled:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI Lab Builder is disabled")
+
+    async def _enforce_real_provider_guards(self, actor: User, confirm_real_provider_usage: bool) -> None:
+        if not self.provider_config.is_real_provider:
+            return
+        if self.provider_config.real_provider_confirmation_required and not confirm_real_provider_usage:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Real AI provider usage requires explicit confirmation.",
+            )
+        today = datetime.combine(datetime.now(UTC).date(), time.min, tzinfo=UTC)
+        preview_count = await self.repository.count_by_requester_since(actor.id, today)
+        if preview_count >= self.provider_config.daily_preview_limit_per_user:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Daily AI preview limit exceeded for this user.",
+            )
+
+    async def _store_invalid_preview(self, actor: User, prompt: str, errors: list[str]) -> AILabBuilderPreview:
+        preview = AILabBuilderPreview(
+            requested_by=actor.id,
+            prompt=prompt,
+            lab_plan_json={"error": "AI provider response could not be parsed"},
+            generated_containerlab_yaml="",
+            generated_configs=[],
+            generated_verification_rules=[],
+            validation_status=AILabBuilderValidationStatus.FAILED.value,
+            validation_errors=errors,
+            status=AILabBuilderPreviewStatus.INVALID.value,
+        )
+        created = await self.repository.create(preview)
+        await self.repository.commit()
+        await self.repository.refresh(created)
+        return created
 
     @staticmethod
     def _require_admin_or_instructor(actor: User) -> None:

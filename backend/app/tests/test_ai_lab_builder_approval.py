@@ -2,8 +2,9 @@ from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from app.adapters.ai_provider import MockAIProvider
+from app.adapters.ai_provider import MockAIProvider, build_ai_provider_config
 from app.api.v1.ai_lab_builder import get_ai_lab_builder_service
+from app.core.config import get_settings
 from app.main import app
 from app.models.lab_instance import LabInstance
 from app.repositories.ai import AILabBuilderPreviewRepository
@@ -18,6 +19,7 @@ def enable_mock_ai(session_factory: async_sessionmaker[AsyncSession]) -> None:
                 repository=AILabBuilderPreviewRepository(session),
                 template_repository=LabTemplateRepository(session),
                 provider=MockAIProvider(),
+                provider_config=build_ai_provider_config(get_settings()),
                 enabled=True,
             )
 

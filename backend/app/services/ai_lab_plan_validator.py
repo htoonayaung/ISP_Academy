@@ -43,7 +43,12 @@ class LabPlanValidator:
         try:
             lab_plan = LabPlan.model_validate(raw_plan)
         except ValidationError as exc:
-            return LabPlanValidationOutcome(False, [error["msg"] for error in exc.errors()])
+            formatted_errors = []
+            for error in exc.errors():
+                location = ".".join(str(item) for item in error.get("loc", []))
+                message = str(error.get("msg", "Invalid value"))
+                formatted_errors.append(f"{location}: {message}" if location else message)
+            return LabPlanValidationOutcome(False, formatted_errors)
 
         errors.extend(self.validate_plan(lab_plan))
         return LabPlanValidationOutcome(not errors, errors, lab_plan)

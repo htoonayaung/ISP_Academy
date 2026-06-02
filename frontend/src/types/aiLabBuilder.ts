@@ -69,3 +69,14 @@ export interface AILabBuilderApproval {
   preview: AILabBuilderPreview;
   created_lab_template_id: string;
 }
+
+export interface AIProviderStatus {
+  enabled: boolean;
+  provider: string;
+  model?: string | null;
+  base_url_host_only?: string | null;
+  has_api_key: boolean;
+  provider_test_enabled: boolean;
+  daily_preview_limit_per_user: number;
+  real_provider_confirmation_required: boolean;
+}

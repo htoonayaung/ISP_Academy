@@ -1,6 +1,7 @@
 import uuid
+from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.ai import AILabBuilderPreview
@@ -32,6 +33,15 @@ class AILabBuilderPreviewRepository:
             .order_by(AILabBuilderPreview.created_at.desc())
         )
         return list(result.scalars().all())
+
+    async def count_by_requester_since(self, user_id: uuid.UUID, since: datetime) -> int:
+        result = await self.session.execute(
+            select(func.count(AILabBuilderPreview.id)).where(
+                AILabBuilderPreview.requested_by == user_id,
+                AILabBuilderPreview.created_at >= since,
+            )
+        )
+        return int(result.scalar_one())
 
     async def delete(self, preview: AILabBuilderPreview) -> None:
         await self.session.delete(preview)

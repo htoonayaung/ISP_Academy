@@ -52,12 +52,18 @@ class Settings(BaseSettings):
     initial_admin_full_name: str = Field(default="Initial Admin", alias="INITIAL_ADMIN_FULL_NAME")
 
     ai_lab_builder_enabled: bool = Field(default=False, alias="AI_LAB_BUILDER_ENABLED")
-    ai_provider: str = Field(default="openai_compatible", alias="AI_PROVIDER")
+    ai_provider: str = Field(default="mock", alias="AI_PROVIDER")
     ai_api_base_url: str | None = Field(default=None, alias="AI_API_BASE_URL")
     ai_api_key: str | None = Field(default=None, alias="AI_API_KEY")
     ai_model: str | None = Field(default=None, alias="AI_MODEL")
-    ai_request_timeout_seconds: int = Field(default=30, alias="AI_REQUEST_TIMEOUT_SECONDS")
+    ai_request_timeout_seconds: int = Field(default=60, alias="AI_REQUEST_TIMEOUT_SECONDS")
     ai_max_tokens: int = Field(default=4000, alias="AI_MAX_TOKENS")
+    ai_daily_preview_limit_per_user: int = Field(default=20, alias="AI_DAILY_PREVIEW_LIMIT_PER_USER")
+    ai_provider_test_enabled: bool = Field(default=False, alias="AI_PROVIDER_TEST_ENABLED")
+    ai_real_provider_confirmation_required: bool = Field(
+        default=True,
+        alias="AI_REAL_PROVIDER_CONFIRMATION_REQUIRED",
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

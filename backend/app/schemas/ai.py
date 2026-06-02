@@ -21,6 +21,7 @@ AssertionType = Literal[
 
 class AILabBuilderPreviewCreate(BaseModel):
     prompt: str = Field(min_length=10, max_length=5000)
+    confirm_real_provider_usage: bool = False
 
 
 class LabPlanNode(BaseModel):
@@ -131,3 +132,14 @@ class AILabBuilderPreviewRead(BaseModel):
 class AILabBuilderApprovalRead(BaseModel):
     preview: AILabBuilderPreviewRead
     created_lab_template_id: uuid.UUID
+
+
+class AIProviderStatusRead(BaseModel):
+    enabled: bool
+    provider: str
+    model: str | None
+    base_url_host_only: str | None
+    has_api_key: bool
+    provider_test_enabled: bool
+    daily_preview_limit_per_user: int
+    real_provider_confirmation_required: bool

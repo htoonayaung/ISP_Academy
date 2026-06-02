@@ -145,3 +145,48 @@ docker compose -f deployments/docker-compose.yml logs --tail=100 celery_worker
 docker compose -f deployments/docker-compose.yml logs --tail=100 postgres
 docker compose -f deployments/docker-compose.yml logs --tail=100 redis
 ```
+
+# AI Lab Builder Provider Troubleshooting
+
+## Mock Provider
+
+Use mock mode for demos and normal development:
+
+```env
+AI_LAB_BUILDER_ENABLED=true
+AI_PROVIDER=mock
+AI_MODEL=mock
+```
+
+If preview creation fails in mock mode, check backend logs and confirm the backend service was restarted after changing `deployments/env/backend.env`.
+
+## Real Provider Confirmation
+
+When `AI_PROVIDER` is not `mock` and `AI_REAL_PROVIDER_CONFIRMATION_REQUIRED=true`, preview creation requires explicit confirmation from the UI or API payload:
+
+```json
+{
+  "prompt": "Create a basic Linux lab with one Alpine host named host1.",
+  "confirm_real_provider_usage": true
+}
+```
+
+If confirmation is missing, the API returns:
+
+```text
+Real AI provider usage requires explicit confirmation.
+```
+
+## Provider Status
+
+Admin users can check safe provider status at:
+
+```text
+GET /api/v1/ai-lab-builder/provider/status
+```
+
+The response never includes `AI_API_KEY`. It returns only `has_api_key` and a host-only base URL.
+
+## Daily Preview Limit
+
+For real providers, `AI_DAILY_PREVIEW_LIMIT_PER_USER` limits preview creation per user per day. Mock mode is intended for demos and avoids accidental quota usage.

@@ -118,12 +118,22 @@ AI_LAB_BUILDER_ENABLED=true
 AI_PROVIDER=mock
 AI_API_BASE_URL=
 AI_API_KEY=
-AI_MODEL=
-AI_REQUEST_TIMEOUT_SECONDS=30
+AI_MODEL=mock
+AI_REQUEST_TIMEOUT_SECONDS=60
 AI_MAX_TOKENS=4000
+AI_DAILY_PREVIEW_LIMIT_PER_USER=20
+AI_PROVIDER_TEST_ENABLED=false
+AI_REAL_PROVIDER_CONFIRMATION_REQUIRED=true
 ```
 
-For real provider testing, keep `AI_PROVIDER=openai_compatible` and configure `AI_API_BASE_URL`, `AI_API_KEY`, and `AI_MODEL` in the server environment. Do not commit real AI keys.
+For real provider testing, configure the provider only in `deployments/env/backend.env`. Do not put API keys in frontend files, Git, or chat.
+
+Recommended real provider trial order:
+
+1. Gemini free tier.
+2. OpenRouter free model.
+3. Groq free tier.
+4. Paid provider only after quality is confirmed.
 
 Open the frontend as Admin or Instructor:
 
@@ -138,6 +148,7 @@ Phase 8 behavior:
 - Approval creates an inactive `LabTemplate`.
 - There is no auto-deploy.
 - Approval does not create, start, inspect, stop, or destroy a lab.
+- Real provider usage requires explicit confirmation when configured.
 - Students cannot access AI Lab Builder routes or menus.
 
 ## Backup

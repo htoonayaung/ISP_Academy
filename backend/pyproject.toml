@@ -34,7 +34,10 @@ env = [
     "AI_API_KEY=test-ai-key",
     "AI_MODEL=test-model",
     "AI_REQUEST_TIMEOUT_SECONDS=5",
-    "AI_MAX_TOKENS=2000"
+    "AI_MAX_TOKENS=2000",
+    "AI_DAILY_PREVIEW_LIMIT_PER_USER=20",
+    "AI_PROVIDER_TEST_ENABLED=false",
+    "AI_REAL_PROVIDER_CONFIRMATION_REQUIRED=true"
 ]
 
 [tool.ruff]

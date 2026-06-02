@@ -79,12 +79,16 @@ export function AiLabBuilderPreviewDetailPage() {
   }
 
   const canApprove = preview.validation_status === "PASSED" && !["APPROVED", "REJECTED"].includes(preview.status);
+  const planTitle = preview.lab_plan_json.title || "AI Preview";
+  const planDescription = preview.lab_plan_json.description || "Review generated output and validation errors.";
+  const nodes = preview.lab_plan_json.nodes || [];
+  const links = preview.lab_plan_json.links || [];
 
   return (
     <div className="space-y-4">
       <PageHeader
-        title={preview.lab_plan_json.title}
-        subtitle={preview.lab_plan_json.description}
+        title={planTitle}
+        subtitle={planDescription}
         action={<CopyId id={preview.id} label="Preview ID" />}
       />
       {error && <Alert message={error} />}
@@ -97,8 +101,8 @@ export function AiLabBuilderPreviewDetailPage() {
         <div className="grid gap-3 text-sm md:grid-cols-4">
           <div><div className="text-slate-500">Status</div><Badge value={preview.status} /></div>
           <div><div className="text-slate-500">Validation</div><Badge value={preview.validation_status} /></div>
-          <div><div className="text-slate-500">Category</div><Badge value={preview.lab_plan_json.category} /></div>
-          <div><div className="text-slate-500">Difficulty</div><Badge value={preview.lab_plan_json.difficulty} /></div>
+          <div><div className="text-slate-500">Category</div><Badge value={preview.lab_plan_json.category || "UNKNOWN"} /></div>
+          <div><div className="text-slate-500">Difficulty</div><Badge value={preview.lab_plan_json.difficulty || "UNKNOWN"} /></div>
         </div>
         {preview.created_lab_template_id && (
           <div className="mt-4 rounded-md bg-slate-50 px-3 py-2 text-sm">
@@ -114,8 +118,8 @@ export function AiLabBuilderPreviewDetailPage() {
       </Card>
       <Card title="Nodes and Links" subtitle="Generated plan summary.">
         <div className="grid gap-4 lg:grid-cols-2">
-          <Table><thead><tr><Th>Node</Th><Th>Kind</Th><Th>Image</Th></tr></thead><tbody>{preview.lab_plan_json.nodes.map((node) => <tr key={node.name}><Td>{node.name}</Td><Td>{node.kind}</Td><Td>{node.image}</Td></tr>)}</tbody></Table>
-          <Table><thead><tr><Th>Endpoints</Th><Th>Subnet</Th></tr></thead><tbody>{preview.lab_plan_json.links.map((link, index) => <tr key={`${link.endpoints.join("-")}-${index}`}><Td>{link.endpoints.join(" <-> ")}</Td><Td>{link.subnet || "-"}</Td></tr>)}</tbody></Table>
+          <Table><thead><tr><Th>Node</Th><Th>Kind</Th><Th>Image</Th></tr></thead><tbody>{nodes.map((node) => <tr key={node.name}><Td>{node.name}</Td><Td>{node.kind}</Td><Td>{node.image}</Td></tr>)}</tbody></Table>
+          <Table><thead><tr><Th>Endpoints</Th><Th>Subnet</Th></tr></thead><tbody>{links.map((link, index) => <tr key={`${link.endpoints.join("-")}-${index}`}><Td>{link.endpoints.join(" <-> ")}</Td><Td>{link.subnet || "-"}</Td></tr>)}</tbody></Table>
         </div>
       </Card>
       <Card title="Generated Configs" subtitle="Startup config preview generated from the plan.">

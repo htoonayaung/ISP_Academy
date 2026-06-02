@@ -72,7 +72,48 @@ AI_LAB_BUILDER_ENABLED=true
 AI_PROVIDER=mock
 ```
 
-For real provider testing:
+Recommended real provider trial order:
+
+1. `mock`
+2. Gemini free tier
+3. OpenRouter free model
+4. Groq free tier
+5. Paid provider only after quality is confirmed
+
+Gemini OpenAI-compatible:
+
+```env
+AI_LAB_BUILDER_ENABLED=true
+AI_PROVIDER=gemini_openai_compatible
+AI_API_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai
+AI_API_KEY=<set-on-server-only>
+AI_MODEL=gemini-2.5-flash-lite
+AI_REAL_PROVIDER_CONFIRMATION_REQUIRED=true
+```
+
+OpenRouter:
+
+```env
+AI_LAB_BUILDER_ENABLED=true
+AI_PROVIDER=openrouter
+AI_API_BASE_URL=https://openrouter.ai/api/v1
+AI_API_KEY=<set-on-server-only>
+AI_MODEL=openrouter/free
+AI_REAL_PROVIDER_CONFIRMATION_REQUIRED=true
+```
+
+Groq:
+
+```env
+AI_LAB_BUILDER_ENABLED=true
+AI_PROVIDER=groq
+AI_API_BASE_URL=https://api.groq.com/openai/v1
+AI_API_KEY=<set-on-server-only>
+AI_MODEL=llama-3.3-70b-versatile
+AI_REAL_PROVIDER_CONFIRMATION_REQUIRED=true
+```
+
+Generic OpenAI-compatible:
 
 ```env
 AI_LAB_BUILDER_ENABLED=true
@@ -80,8 +121,10 @@ AI_PROVIDER=openai_compatible
 AI_API_BASE_URL=https://provider.example/v1
 AI_API_KEY=<set-on-server-only>
 AI_MODEL=<provider-model-name>
-AI_REQUEST_TIMEOUT_SECONDS=30
+AI_REQUEST_TIMEOUT_SECONDS=60
 AI_MAX_TOKENS=4000
+AI_DAILY_PREVIEW_LIMIT_PER_USER=20
+AI_REAL_PROVIDER_CONFIRMATION_REQUIRED=true
 ```
 
 Never commit real `AI_API_KEY` values.
@@ -89,6 +132,8 @@ Never commit real `AI_API_KEY` values.
 ## Troubleshooting
 
 If preview generation returns `503`, AI Lab Builder is disabled or provider configuration is missing.
+
+If preview generation returns `400` with real provider confirmation text, check the UI confirmation box before submitting.
 
 If validation fails, adjust the prompt and generate a new preview. Do not manually edit preview JSON in the database.
 

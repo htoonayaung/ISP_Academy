@@ -101,6 +101,7 @@ No authentication, user, lab, ticket, verification, AI, mentor, admin, or instru
 | Phase | Method | Path | Purpose | Roles |
 | --- | --- | --- | --- | --- |
 | Phase 8 | `POST` | `/api/v1/ai-lab-builder/preview` | Generate validated lab preview. | Admin, Instructor |
+| Phase 8.5 | `GET` | `/api/v1/ai-lab-builder/provider/status` | Return safe provider status without API key. | Admin |
 | Phase 8 | `GET` | `/api/v1/ai-lab-builder/previews` | List AI lab previews. | Admin all, owner Instructor |
 | Phase 8 | `GET` | `/api/v1/ai-lab-builder/previews/{preview_id}` | View preview. | Admin, owner Instructor |
 | Phase 8 | `POST` | `/api/v1/ai-lab-builder/previews/{preview_id}/approve` | Approve preview and create inactive lab template. | Admin, owner Instructor |

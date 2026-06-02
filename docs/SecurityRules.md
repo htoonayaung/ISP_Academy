@@ -74,6 +74,9 @@ Rules:
 - Approval creates an inactive `LabTemplate` only.
 - Approval must never create or start a `LabInstance`.
 - AI provider credentials must come from environment variables and must not be logged.
+- Real provider preview requests must require explicit user confirmation when configured.
+- Real provider usage must enforce a simple per-user daily preview limit.
+- Provider status APIs must return only redacted metadata such as host-only base URL and `has_api_key`.
 
 MVP AI LabPlan constraints:
 
