@@ -40,8 +40,9 @@ class LabPlanValidator:
 
     def validate_raw(self, raw_plan: dict) -> LabPlanValidationOutcome:
         errors: list[str] = []
+        normalized_plan = self._normalize_raw_plan(raw_plan)
         try:
-            lab_plan = LabPlan.model_validate(raw_plan)
+            lab_plan = LabPlan.model_validate(normalized_plan)
         except ValidationError as exc:
             formatted_errors = []
             for error in exc.errors():
@@ -52,6 +53,14 @@ class LabPlanValidator:
 
         errors.extend(self.validate_plan(lab_plan))
         return LabPlanValidationOutcome(not errors, errors, lab_plan)
+
+    @staticmethod
+    def _normalize_raw_plan(raw_plan: dict) -> dict:
+        normalized = dict(raw_plan)
+        safety_notes = normalized.get("safety_notes")
+        if isinstance(safety_notes, str):
+            normalized["safety_notes"] = [safety_notes]
+        return normalized
 
     def validate_plan(self, plan: LabPlan) -> list[str]:
         errors: list[str] = []

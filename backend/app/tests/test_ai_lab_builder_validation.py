@@ -81,3 +81,13 @@ def test_unsupported_command_rejected() -> None:
 
     assert outcome.is_valid is False
     assert any("Unsupported AI-generated verification command" in error for error in outcome.errors)
+
+
+def test_string_safety_notes_are_normalized() -> None:
+    plan = valid_plan()
+    plan["safety_notes"] = "Uses one allowlisted Alpine Linux node."
+    outcome = LabPlanValidator().validate_raw(plan)
+
+    assert outcome.is_valid is True
+    assert outcome.lab_plan is not None
+    assert outcome.lab_plan.safety_notes == ["Uses one allowlisted Alpine Linux node."]
