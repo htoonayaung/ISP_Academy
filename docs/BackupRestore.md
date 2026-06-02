@@ -33,6 +33,31 @@ cd /opt/isp-academy/deployments
 docker compose exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > ../backups/isp_academy_YYYYmmdd_HHMMSS.dump
 ```
 
+## Pre-Release Backup Checklist
+
+Before creating a release tag or running a public demo:
+
+```bash
+cd /opt/isp-academy
+bash scripts/backup_database.sh
+ls -lh backups/
+```
+
+Confirm:
+
+- A new `backups/*.dump` file exists.
+- The file timestamp matches the current release rehearsal.
+- The file size is greater than zero.
+- The backup is copied to a safe location outside the server if this is an important demo.
+
+Recommended safe storage:
+
+- Encrypted external drive.
+- Private backup server.
+- Private cloud storage controlled by the project owner.
+
+Do not store release backups only in the Git repository working tree.
+
 ## PostgreSQL Restore
 
 Use the helper script with a backup path:
@@ -43,6 +68,12 @@ bash scripts/restore_database.sh backups/isp_academy_YYYYmmdd_HHMMSS.dump
 ```
 
 Restore replaces database objects in the target database. Confirm you are restoring to the intended environment.
+
+Restore dry-run warning:
+
+- There is no automatic dry-run restore in the MVP scripts.
+- Test restore only on a separate staging server or disposable database.
+- Do not test restore against the live demo database unless you intend to replace current data.
 
 Manual equivalent:
 
@@ -69,7 +100,7 @@ After a successful demo-readiness check:
 
 ```bash
 cd /opt/isp-academy
-git tag phase-7.5-demo-ready
+git tag -a v0.3.0-demo-ready -m "Demo-ready MVP release"
 ```
 
 Push tags only after reviewing that no secrets are staged or committed.
@@ -79,9 +110,13 @@ Push tags only after reviewing that no secrets are staged or committed.
 Never commit:
 
 - `deployments/env/backend.env`
+- API keys.
 - JWT secret values.
 - PostgreSQL passwords.
 - GitHub tokens.
 - Real admin passwords.
+- Demo passwords.
+- `backups/*.dump`
+- `backups/*.sql`
 
 Keep only `.env.example` files in Git.

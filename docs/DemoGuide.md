@@ -52,6 +52,15 @@ Use the seeded admin account to create instructor and student demo accounts.
 
 Do not commit real demo passwords to Git.
 
+## Demo Account Safety
+
+- Demo accounts are for internal testing and presentation rehearsal only.
+- Do not publish real demo passwords in docs, Git, screenshots, or chat.
+- Change demo passwords before any public demo.
+- Rotate the admin account password if it was shared during setup or rehearsal.
+- Keep `deployments/env/backend.env` private.
+- Use generated or temporary passwords for demo accounts when possible.
+
 ## Admin Flow
 
 1. Log in.

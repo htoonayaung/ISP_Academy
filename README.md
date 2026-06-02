@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-Phase 9B polishes the browser demo journey on top of the current MVP: backend, lab engine, verification engine, minimal frontend, AI Lab Builder v1, demo setup, documentation, and guided student workflow screens.
+The current MVP is demo-ready. Phase 9B polished the browser demo journey, and the release freeze package documents rehearsal, backup, architecture, and tagging for `v0.3.0-demo-ready`.
 
 ## Current MVP Status
 
@@ -19,6 +19,7 @@ Completed:
 - AI Lab Builder v1 preview, validation, and approval into inactive lab templates.
 - Admin-only Demo Setup Wizard for repeatable MVP demos.
 - Phase 9B polished browser demo flow for the student ticket, lab, verification, and destroy journey.
+- Demo rehearsal and release freeze documentation for `v0.3.0-demo-ready`.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
 Not included yet:
@@ -34,6 +35,27 @@ Not included yet:
 - Frontend: `http://10.0.44.2:3000`
 - Backend API: `http://10.0.44.2:8000`
 - Swagger: `http://10.0.44.2:8000/docs`
+
+## Current Demo-Ready Release
+
+Recommended tag:
+
+```text
+v0.3.0-demo-ready
+```
+
+Release docs:
+
+- [Demo Rehearsal Checklist](docs/DemoRehearsalChecklist.md)
+- [Release Notes v0.3.0](docs/ReleaseNotes_v0.3.0.md)
+- [Architecture Snapshot v0.3.0](docs/ArchitectureSnapshot_v0.3.0.md)
+- [Release Checklist](docs/ReleaseChecklist.md)
+
+Quick demo path:
+
+```text
+Admin Demo Setup -> Student Demo Flow -> AI Lab Builder Preview
+```
 
 ## Quick Start
 
@@ -86,6 +108,7 @@ docker compose -f deployments/docker-compose.yml exec backend python -m app.scri
 8. Continue with the manual ticket, verification rule, student attempt, lab start, verification, and lab destroy flow.
 
 Full checklist: [docs/DemoGuide.md](docs/DemoGuide.md)
+Release rehearsal checklist: [docs/DemoRehearsalChecklist.md](docs/DemoRehearsalChecklist.md)
 
 ## Test Commands
 
@@ -244,7 +267,7 @@ After verifying the demo:
 
 ```bash
 cd /opt/isp-academy
-git tag phase-8-ai-lab-builder-ready
+git tag -a v0.3.0-demo-ready -m "Demo-ready MVP release"
 ```
 
 Review staged files before pushing. Do not commit real secrets or real environment files.
