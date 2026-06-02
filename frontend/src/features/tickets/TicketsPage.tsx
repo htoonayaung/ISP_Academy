@@ -47,6 +47,14 @@ export function TicketsPage() {
       await load();
     } catch (err) { setError(err instanceof Error ? err.message : "Status update failed"); }
   }
+  async function hardDelete(ticket: Ticket) {
+    if (!confirm(`Permanently delete "${ticket.title}"? This is blocked if student attempts exist.`)) return;
+    try {
+      setError("");
+      await api(`/api/v1/tickets/${ticket.id}/hard-delete`, { method: "DELETE" });
+      await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Delete failed"); }
+  }
   return <div className="space-y-4">
     <PageHeader title={canManage ? "Ticket Management" : "Published Tickets"} subtitle={canManage ? "Create, publish, archive, and prepare verification rules for troubleshooting tickets." : "Choose a published ticket to start a lab attempt."} />
     <Card title={canManage ? "Tickets" : "Available Tickets"} subtitle={canManage ? "Draft tickets stay private until published." : "Only published tickets are shown to students."} action={canManage && <Button onClick={() => setCreating(true)}>Create ticket</Button>}>
@@ -54,7 +62,7 @@ export function TicketsPage() {
     <Table><thead><tr><Th>Title</Th><Th>Category</Th><Th>Difficulty</Th><Th>Status</Th><Th>Actions</Th></tr></thead><tbody>{tickets.map((ticket) => {
       const template = templates.find((item) => item.id === ticket.lab_template_id);
       const isDemo = ticket.slug === "demo-linux-verification-ticket";
-      return <tr key={ticket.id}><Td><Link className="font-medium text-teal-700" to={`/tickets/${ticket.id}`}>{ticket.title}</Link>{isDemo && <span className="ml-2 rounded bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">Demo</span>}<div className="text-xs text-slate-500">{ticket.description}</div></Td><Td>{template?.category || "-"}</Td><Td>{template?.difficulty ? <Badge value={template.difficulty} /> : "-"}</Td><Td><Badge value={ticket.status} /></Td><Td><div className="flex flex-wrap gap-2">{canManage && <><Button onClick={() => setEditing(ticket)}>Edit</Button>{ticket.status !== "PUBLISHED" && <Button onClick={() => setStatus(ticket, "PUBLISHED", "Publish this ticket to students?")}>Publish</Button>}{ticket.status === "PUBLISHED" && <Button onClick={() => setStatus(ticket, "DRAFT", "Unpublish this ticket and return it to draft?")}>Unpublish</Button>}{ticket.status !== "ARCHIVED" && <Button className="bg-rose-700 hover:bg-rose-800" onClick={() => setStatus(ticket, "ARCHIVED", "Archive this ticket? Students will no longer see it.")}>Archive</Button>}</>} {!canManage && <Link className="inline-flex min-h-9 items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700" to={`/tickets/${ticket.id}`}>View Ticket</Link>}</div></Td></tr>;
+      return <tr key={ticket.id}><Td><Link className="font-medium text-teal-700" to={`/tickets/${ticket.id}`}>{ticket.title}</Link>{isDemo && <span className="ml-2 rounded bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-700">Demo</span>}<div className="text-xs text-slate-500">{ticket.description}</div></Td><Td>{template?.category || "-"}</Td><Td>{template?.difficulty ? <Badge value={template.difficulty} /> : "-"}</Td><Td><Badge value={ticket.status} /></Td><Td><div className="flex flex-wrap gap-2">{canManage && <><Button onClick={() => setEditing(ticket)}>Edit</Button>{ticket.status !== "PUBLISHED" && <Button onClick={() => setStatus(ticket, "PUBLISHED", "Publish this ticket to students?")}>Publish</Button>}{ticket.status === "PUBLISHED" && <Button onClick={() => setStatus(ticket, "DRAFT", "Unpublish this ticket and return it to draft?")}>Unpublish</Button>}{ticket.status !== "ARCHIVED" && <Button className="bg-rose-700 hover:bg-rose-800" onClick={() => setStatus(ticket, "ARCHIVED", "Archive this ticket? Students will no longer see it.")}>Archive</Button>}<Button className="bg-red-800 hover:bg-red-900" onClick={() => hardDelete(ticket)}>Delete</Button></>} {!canManage && <Link className="inline-flex min-h-9 items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700" to={`/tickets/${ticket.id}`}>View Ticket</Link>}</div></Td></tr>;
     })}</tbody></Table>
     {tickets.length === 0 && !error && <EmptyState title={canManage ? "No tickets yet" : "No published tickets yet"} description={canManage ? "Create a ticket from an active lab template, then publish it for students." : "No published tickets yet. Ask your instructor."} />}
   </Card>{(creating || editing) && <Modal title={editing ? "Ticket" : "Create ticket"} onClose={() => { setCreating(false); setEditing(null); }}><TicketForm ticket={editing || undefined} templates={templates} onSubmit={save} /></Modal>}</div>;

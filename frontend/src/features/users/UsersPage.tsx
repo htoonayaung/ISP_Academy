@@ -62,6 +62,16 @@ export function UsersPage() {
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to reset password"); }
   }
 
+  async function hardDelete(user: User) {
+    if (!confirm(`Permanently delete ${user.username}? This only works for inactive users with no history.`)) return;
+    try {
+      setError(""); setMessage("");
+      await api(`/api/v1/users/${user.id}/hard-delete`, { method: "DELETE" });
+      setMessage(`${user.username} deleted.`);
+      await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Delete failed"); }
+  }
+
   return (
     <div className="space-y-4">
       <PageHeader title="Users" subtitle="Create demo accounts and manage basic role-based access." />
@@ -69,7 +79,7 @@ export function UsersPage() {
         {error && <div className="mb-3"><Alert message={error} /></div>}
         {message && <div className="mb-3 rounded-md bg-teal-50 px-3 py-2 text-sm text-teal-800">{message}</div>}
         <Table><thead><tr><Th>User</Th><Th>Role</Th><Th>Status</Th><Th>Actions</Th></tr></thead><tbody>
-          {users.map((user) => <tr key={user.id}><Td><div className="font-medium">{user.username}</div><div className="text-xs text-slate-500">{user.email}</div><div className="text-xs text-slate-500">{user.full_name}</div></Td><Td>{user.role}</Td><Td><Badge value={user.is_active ? "ACTIVE" : "INACTIVE"} /></Td><Td><div className="flex flex-wrap gap-2"><Button onClick={() => setEditing(user)}>View/Edit</Button><Button onClick={() => { setResetting(user); setNewPassword(""); }}>Reset Password</Button>{user.is_active ? <Button disabled={user.id === currentUser?.id} className="bg-rose-700 hover:bg-rose-800" onClick={() => setActive(user, false)}>Deactivate</Button> : <Button className="bg-teal-700 hover:bg-teal-800" onClick={() => setActive(user, true)}>Reactivate</Button>}</div></Td></tr>)}
+          {users.map((user) => <tr key={user.id}><Td><div className="font-medium">{user.username}</div><div className="text-xs text-slate-500">{user.email}</div><div className="text-xs text-slate-500">{user.full_name}</div></Td><Td>{user.role}</Td><Td><Badge value={user.is_active ? "ACTIVE" : "INACTIVE"} /></Td><Td><div className="flex flex-wrap gap-2"><Button onClick={() => setEditing(user)}>View/Edit</Button><Button onClick={() => { setResetting(user); setNewPassword(""); }}>Reset Password</Button>{user.is_active ? <Button disabled={user.id === currentUser?.id} className="bg-rose-700 hover:bg-rose-800" onClick={() => setActive(user, false)}>Deactivate</Button> : <Button className="bg-teal-700 hover:bg-teal-800" onClick={() => setActive(user, true)}>Reactivate</Button>}<Button disabled={user.is_active || user.id === currentUser?.id} className="bg-red-800 hover:bg-red-900" onClick={() => hardDelete(user)}>Delete</Button></div></Td></tr>)}
         </tbody></Table>
         {users.length === 0 && !error && <EmptyState title="No users yet" description="Create an instructor or student account for the demo." />}
       </Card>

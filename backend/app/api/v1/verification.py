@@ -63,6 +63,15 @@ async def delete_verification_rule(
     return await service.delete_rule(current_user, rule_id)
 
 
+@router.delete("/verification-rules/{rule_id}/hard-delete", status_code=status.HTTP_204_NO_CONTENT)
+async def hard_delete_verification_rule(
+    rule_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: VerificationService = Depends(get_verification_service),
+) -> None:
+    await service.hard_delete_rule(current_user, rule_id)
+
+
 @router.get("/attempts/{attempt_id}/verification-runs", response_model=list[VerificationRunRead])
 async def list_attempt_verification_runs(
     attempt_id: uuid.UUID,

@@ -1,9 +1,10 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.ticket import Ticket, TicketAttempt, TicketStatus
+from app.models.verification import VerificationResult, VerificationRule, VerificationRun
 
 
 class TicketRepository:
@@ -72,6 +73,26 @@ class TicketRepository:
             .order_by(TicketAttempt.created_at.desc())
         )
         return list(result.scalars().all())
+
+    async def count_attempts_for_ticket(self, ticket_id: uuid.UUID) -> int:
+        result = await self.session.execute(
+            select(func.count(TicketAttempt.id)).where(TicketAttempt.ticket_id == ticket_id)
+        )
+        return int(result.scalar_one())
+
+    async def delete_ticket_with_rules(self, ticket: Ticket) -> None:
+        await self.session.execute(delete(VerificationRule).where(VerificationRule.ticket_id == ticket.id))
+        await self.session.delete(ticket)
+
+    async def delete_attempt_with_runs(self, attempt: TicketAttempt) -> None:
+        run_result = await self.session.execute(
+            select(VerificationRun.id).where(VerificationRun.ticket_attempt_id == attempt.id)
+        )
+        run_ids = list(run_result.scalars().all())
+        if run_ids:
+            await self.session.execute(delete(VerificationResult).where(VerificationResult.verification_run_id.in_(run_ids)))
+            await self.session.execute(delete(VerificationRun).where(VerificationRun.id.in_(run_ids)))
+        await self.session.delete(attempt)
 
     async def commit(self) -> None:
         await self.session.commit()

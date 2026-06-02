@@ -98,6 +98,17 @@ class TicketService:
         await self.repository.refresh(ticket)
         return ticket
 
+    async def hard_delete_ticket(self, actor: User, ticket_id: uuid.UUID) -> None:
+        ticket = await self.get_ticket(actor, ticket_id)
+        self._require_owner_or_admin(actor, ticket)
+        if await self.repository.count_attempts_for_ticket(ticket.id) > 0:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ticket has student attempts; archive instead",
+            )
+        await self.repository.delete_ticket_with_rules(ticket)
+        await self.repository.commit()
+
     async def publish_ticket(self, actor: User, ticket_id: uuid.UUID) -> Ticket:
         ticket = await self.get_ticket(actor, ticket_id)
         self._require_owner_or_admin(actor, ticket)
@@ -159,6 +170,19 @@ class TicketService:
         if attempt.student_id == actor.id:
             return attempt
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
+    async def hard_delete_attempt(self, actor: User, attempt_id: uuid.UUID) -> None:
+        attempt = await self.get_attempt(actor, attempt_id)
+        if actor.role == UserRole.STUDENT:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        lab = await self.lab_repository.get_by_id(attempt.lab_instance_id)
+        if lab is not None and lab.status in {"STARTING", "RUNNING", "STOPPING", "DESTROYING"}:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Attempt has an active lab; stop or destroy the lab first",
+            )
+        await self.repository.delete_attempt_with_runs(attempt)
+        await self.repository.commit()
 
     async def get_my_attempt(self, actor: User, attempt_id: uuid.UUID) -> TicketAttempt:
         if actor.role != UserRole.STUDENT:

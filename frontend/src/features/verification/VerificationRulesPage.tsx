@@ -66,6 +66,15 @@ export function VerificationRulesPage() {
       await load();
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to update rule"); }
   }
+  async function hardDelete(rule: VerificationRule) {
+    if (!confirm(`Permanently delete rule "${rule.name}"? This is blocked if run history exists.`)) return;
+    try {
+      setError(""); setMessage("");
+      await api(`/api/v1/verification-rules/${rule.id}/hard-delete`, { method: "DELETE" });
+      setMessage(`${rule.name} deleted.`);
+      await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Delete failed"); }
+  }
   return <div className="space-y-4">
   <PageHeader title="Verification Rules" subtitle="Create simple command checks for this ticket. Rules run only against lab-owned nodes." />
   <Card title="Create Rule" subtitle="Target node is the node name in the lab template. Command output is compared with the selected assertion.">
@@ -80,7 +89,7 @@ export function VerificationRulesPage() {
       <Input type="number" value={form.timeout_seconds} onChange={(e) => setForm({ ...form, timeout_seconds: Number(e.target.value) })} />
       <div className="flex gap-2 md:col-span-3"><Button>{editingId ? "Update rule" : "Create rule"}</Button>{editingId && <Button type="button" className="bg-slate-200 text-slate-900 hover:bg-slate-300" onClick={() => { setEditingId(null); setForm({ name: "", target_node: "host1", command: "echo ok", parser_type: "SIMPLE_TEXT", assertion_type: "CONTAINS", expected_value: "ok", timeout_seconds: 5, is_active: true }); }}>Cancel edit</Button>}</div>
     </form>
-    <Table><thead><tr><Th>Name</Th><Th>Target Node</Th><Th>Command</Th><Th>Assertion</Th><Th>Expected</Th><Th>Status</Th><Th>Action</Th></tr></thead><tbody>{rules.map((rule) => <tr key={rule.id}><Td>{rule.name}</Td><Td>{rule.target_node}</Td><Td><code className="rounded bg-slate-100 px-1">{rule.command}</code></Td><Td>{rule.assertion_type}</Td><Td>{rule.expected_value || "-"}</Td><Td>{rule.is_active ? "ACTIVE" : "INACTIVE"}</Td><Td><div className="flex flex-wrap gap-2"><Button onClick={() => edit(rule)}>Edit</Button>{rule.is_active ? <Button className="bg-rose-700 hover:bg-rose-800" onClick={() => setActive(rule, false)}>Deactivate</Button> : <Button className="bg-teal-700 hover:bg-teal-800" onClick={() => setActive(rule, true)}>Reactivate</Button>}</div></Td></tr>)}</tbody></Table>
+    <Table><thead><tr><Th>Name</Th><Th>Target Node</Th><Th>Command</Th><Th>Assertion</Th><Th>Expected</Th><Th>Status</Th><Th>Action</Th></tr></thead><tbody>{rules.map((rule) => <tr key={rule.id}><Td>{rule.name}</Td><Td>{rule.target_node}</Td><Td><code className="rounded bg-slate-100 px-1">{rule.command}</code></Td><Td>{rule.assertion_type}</Td><Td>{rule.expected_value || "-"}</Td><Td>{rule.is_active ? "ACTIVE" : "INACTIVE"}</Td><Td><div className="flex flex-wrap gap-2"><Button onClick={() => edit(rule)}>Edit</Button>{rule.is_active ? <Button className="bg-rose-700 hover:bg-rose-800" onClick={() => setActive(rule, false)}>Deactivate</Button> : <Button className="bg-teal-700 hover:bg-teal-800" onClick={() => setActive(rule, true)}>Reactivate</Button>}<Button className="bg-red-800 hover:bg-red-900" onClick={() => hardDelete(rule)}>Delete</Button></div></Td></tr>)}</tbody></Table>
     {rules.length === 0 && !error && <EmptyState title="No verification rules yet" description="Add a target node, command, assertion, and expected value for the student demo." />}
   </Card></div>;
 }

@@ -8,6 +8,7 @@ import { PageHeader } from "../../components/ui/PageHeader";
 import { Select } from "../../components/ui/Select";
 import { Table, Td, Th } from "../../components/ui/Table";
 import { Alert } from "../../components/ui/Alert";
+import { api } from "../../lib/api";
 import { canDestroyLab, canStartLab, canStopLab, formatDate } from "../../lib/format";
 import { Lab } from "../../types/lab";
 import { labApi } from "./labApi";
@@ -33,6 +34,15 @@ export function MyLabsPage() {
     } catch (err) { setError(err instanceof Error ? err.message : "Lab action failed"); }
     finally { setBusyId(""); }
   }
+  async function hardDelete(lab: Lab) {
+    if (!confirm(`Permanently delete lab record ${lab.lab_name}? This is blocked if it is active or linked to an attempt.`)) return;
+    try {
+      setBusyId(lab.id); setError("");
+      await api(`/api/v1/labs/${lab.id}/hard-delete`, { method: "DELETE" });
+      await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Delete failed"); }
+    finally { setBusyId(""); }
+  }
   const visibleLabs = labs.filter((lab) => {
     if (filter === "ALL") return true;
     if (filter === "RUNNING") return lab.status === "RUNNING";
@@ -46,7 +56,7 @@ export function MyLabsPage() {
     <Card title="Labs" subtitle="Running labs consume server resources. Destroy demo labs when finished." action={<div className="flex items-center gap-2"><Select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="ALL">All</option><option value="RUNNING">Running</option><option value="READY">Created/Stopped</option><option value="FAILED">Failed</option><option value="DESTROYED">Destroyed</option></Select><Button onClick={load}>Refresh</Button></div>}>
       {error && <div className="mb-3"><Alert message={error} /></div>}
       <Table><thead><tr><Th>Name</Th><Th>Status</Th><Th>Created</Th><Th>Actions</Th></tr></thead><tbody>
-    {visibleLabs.map((lab) => <tr key={lab.id}><Td><Link className="font-medium text-teal-700" to={`/labs/${lab.id}`}>{lab.lab_name}</Link></Td><Td><Badge value={lab.status} /></Td><Td>{formatDate(lab.created_at)}</Td><Td><div className="flex flex-wrap gap-2"><Link className="inline-flex min-h-9 items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700" to={`/labs/${lab.id}`}>View</Link><Button disabled={busyId === lab.id || !canStartLab(lab.status)} onClick={() => run(lab, "start")}>Start</Button><Button disabled={busyId === lab.id || !canStopLab(lab.status)} onClick={() => run(lab, "stop")}>Stop</Button><Button disabled={busyId === lab.id || !canDestroyLab(lab.status)} className="bg-rose-700 hover:bg-rose-800" onClick={() => run(lab, "destroy")}>Destroy</Button></div></Td></tr>)}
+    {visibleLabs.map((lab) => <tr key={lab.id}><Td><Link className="font-medium text-teal-700" to={`/labs/${lab.id}`}>{lab.lab_name}</Link></Td><Td><Badge value={lab.status} /></Td><Td>{formatDate(lab.created_at)}</Td><Td><div className="flex flex-wrap gap-2"><Link className="inline-flex min-h-9 items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700" to={`/labs/${lab.id}`}>View</Link><Button disabled={busyId === lab.id || !canStartLab(lab.status)} onClick={() => run(lab, "start")}>Start</Button><Button disabled={busyId === lab.id || !canStopLab(lab.status)} onClick={() => run(lab, "stop")}>Stop</Button><Button disabled={busyId === lab.id || !canDestroyLab(lab.status)} className="bg-rose-700 hover:bg-rose-800" onClick={() => run(lab, "destroy")}>Destroy</Button><Button disabled={busyId === lab.id || ["STARTING", "RUNNING", "STOPPING", "DESTROYING"].includes(lab.status)} className="bg-red-800 hover:bg-red-900" onClick={() => hardDelete(lab)}>Delete</Button></div></Td></tr>)}
   </tbody></Table>{visibleLabs.length === 0 && <EmptyState title="No labs found" description="Adjust the filter or start a published ticket attempt to create a linked lab." />}</Card>
   </div>;
 }

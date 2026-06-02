@@ -1,9 +1,12 @@
 import uuid
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User, UserRole
+from app.models.lab_instance import LabInstance, LabEvent
+from app.models.lab_template import LabTemplate
+from app.models.ticket import Ticket, TicketAttempt
 
 
 class UserRepository:
@@ -54,3 +57,19 @@ class UserRepository:
     async def refresh(self, user: User) -> None:
         await self.session.refresh(user)
 
+    async def has_references(self, user_id: uuid.UUID) -> bool:
+        checks = [
+            select(func.count(LabTemplate.id)).where(LabTemplate.created_by == user_id),
+            select(func.count(Ticket.id)).where(Ticket.created_by == user_id),
+            select(func.count(TicketAttempt.id)).where(TicketAttempt.student_id == user_id),
+            select(func.count(LabInstance.id)).where(LabInstance.owner_id == user_id),
+            select(func.count(LabEvent.id)).where(LabEvent.created_by == user_id),
+        ]
+        for query in checks:
+            result = await self.session.execute(query)
+            if int(result.scalar_one()) > 0:
+                return True
+        return False
+
+    async def delete(self, user: User) -> None:
+        await self.session.delete(user)

@@ -88,6 +88,19 @@ class VerificationService:
         await self.repository.refresh(rule)
         return rule
 
+    async def hard_delete_rule(self, actor: User, rule_id: uuid.UUID) -> None:
+        rule = await self.repository.get_rule_by_id(rule_id)
+        if rule is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Verification rule not found")
+        await self._get_ticket_for_rule_management(actor, rule.ticket_id)
+        if await self.repository.count_results_for_rule(rule.id) > 0:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Verification rule has run history; deactivate instead",
+            )
+        await self.repository.delete_rule(rule)
+        await self.repository.commit()
+
     async def queue_verification(self, actor: User, attempt_id: uuid.UUID) -> VerificationRun:
         attempt = await self._get_own_attempt(actor, attempt_id)
         lab = await self.lab_repository.get_by_id(attempt.lab_instance_id)

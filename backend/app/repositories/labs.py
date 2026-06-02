@@ -1,10 +1,11 @@
 import uuid
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.models.lab_instance import LabEvent, LabInstance, LabNode
+from app.models.ticket import TicketAttempt
 
 
 class LabRepository:
@@ -63,6 +64,17 @@ class LabRepository:
             select(LabEvent).where(LabEvent.lab_instance_id == lab_id).order_by(LabEvent.created_at.desc())
         )
         return list(result.scalars().all())
+
+    async def count_attempts_for_lab(self, lab_id: uuid.UUID) -> int:
+        result = await self.session.execute(
+            select(func.count(TicketAttempt.id)).where(TicketAttempt.lab_instance_id == lab_id)
+        )
+        return int(result.scalar_one())
+
+    async def delete_lab_with_children(self, lab: LabInstance) -> None:
+        await self.session.execute(delete(LabEvent).where(LabEvent.lab_instance_id == lab.id))
+        await self.session.execute(delete(LabNode).where(LabNode.lab_instance_id == lab.id))
+        await self.session.delete(lab)
 
     async def commit(self) -> None:
         await self.session.commit()

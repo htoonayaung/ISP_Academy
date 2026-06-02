@@ -70,3 +70,12 @@ async def reset_user_password(
     service: UserService = Depends(get_user_service),
 ) -> User:
     return await service.reset_password(current_user, user_id, payload)
+
+
+@router.delete("/{user_id}/hard-delete", status_code=status.HTTP_204_NO_CONTENT)
+async def hard_delete_user(
+    user_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: UserService = Depends(get_user_service),
+) -> None:
+    await service.hard_delete_user(current_user, user_id)

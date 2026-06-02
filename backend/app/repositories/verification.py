@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.verification import VerificationResult, VerificationRule, VerificationRun
@@ -73,6 +73,15 @@ class VerificationRepository:
             .order_by(VerificationResult.created_at.asc())
         )
         return list(result.scalars().all())
+
+    async def count_results_for_rule(self, rule_id: uuid.UUID) -> int:
+        result = await self.session.execute(
+            select(func.count(VerificationResult.id)).where(VerificationResult.verification_rule_id == rule_id)
+        )
+        return int(result.scalar_one())
+
+    async def delete_rule(self, rule: VerificationRule) -> None:
+        await self.session.delete(rule)
 
     async def commit(self) -> None:
         await self.session.commit()

@@ -119,6 +119,29 @@ class UserService:
         await self.repository.refresh(user)
         return user
 
+    async def hard_delete_user(self, actor: User, user_id: uuid.UUID) -> None:
+        self._require_admin(actor)
+        if actor.id == user_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Current admin cannot delete their own account",
+            )
+        user = await self.repository.get_by_id(user_id)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        if user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Deactivate user before hard delete",
+            )
+        if await self.repository.has_references(user.id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="User has related labs, tickets, templates, attempts, or events; deactivate instead",
+            )
+        await self.repository.delete(user)
+        await self.repository.commit()
+
     @staticmethod
     def _require_admin(actor: User) -> None:
         if actor.role != UserRole.ADMIN:

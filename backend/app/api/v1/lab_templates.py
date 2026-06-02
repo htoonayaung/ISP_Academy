@@ -77,6 +77,15 @@ async def duplicate_lab_template(
     return await service.duplicate_template(current_user, template_id)
 
 
+@router.delete("/{template_id}/hard-delete", status_code=status.HTTP_204_NO_CONTENT)
+async def hard_delete_lab_template(
+    template_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: LabTemplateService = Depends(get_lab_template_service),
+) -> None:
+    await service.hard_delete_template(current_user, template_id)
+
+
 @router.post("/{template_id}/validate", response_model=LabTemplateValidationResult)
 async def validate_lab_template(
     template_id: uuid.UUID,

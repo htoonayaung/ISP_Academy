@@ -151,6 +151,17 @@ class LabTemplateService:
         await self.repository.refresh(created)
         return created
 
+    async def hard_delete_template(self, actor: User, template_id: uuid.UUID) -> None:
+        template = await self.get_template(actor, template_id)
+        self._require_owner_or_admin(actor, template)
+        if await self.repository.has_references(template.id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Template has tickets or lab history; deactivate instead",
+            )
+        await self.repository.delete(template)
+        await self.repository.commit()
+
     async def validate_template(
         self,
         actor: User,

@@ -76,6 +76,15 @@ async def delete_ticket(
     return service.shape_ticket(current_user, ticket)
 
 
+@router.delete("/{ticket_id}/hard-delete", status_code=status.HTTP_204_NO_CONTENT)
+async def hard_delete_ticket(
+    ticket_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: TicketService = Depends(get_ticket_service),
+) -> None:
+    await service.hard_delete_ticket(current_user, ticket_id)
+
+
 @router.post("/{ticket_id}/publish")
 async def publish_ticket(
     ticket_id: uuid.UUID,
@@ -137,3 +146,12 @@ async def get_attempt(
     service: TicketService = Depends(get_ticket_service),
 ) -> TicketAttempt:
     return await service.get_attempt(current_user, attempt_id)
+
+
+@attempts_router.delete("/{attempt_id}/hard-delete", status_code=status.HTTP_204_NO_CONTENT)
+async def hard_delete_attempt(
+    attempt_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: TicketService = Depends(get_ticket_service),
+) -> None:
+    await service.hard_delete_attempt(current_user, attempt_id)

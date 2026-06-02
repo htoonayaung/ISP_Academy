@@ -1,5 +1,7 @@
 import uuid
+import shutil
 from datetime import UTC, datetime
+from pathlib import Path
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -138,6 +140,32 @@ class LabService:
 
         destroy_lab_task.delay(str(lab.id), str(actor.id))
         return lab
+
+    async def hard_delete_lab(self, actor: User, lab_id: uuid.UUID) -> None:
+        lab = await self.get_lab(actor, lab_id)
+        if actor.role not in {UserRole.ADMIN, UserRole.INSTRUCTOR}:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        if lab.status in {
+            LabInstanceStatus.STARTING.value,
+            LabInstanceStatus.RUNNING.value,
+            LabInstanceStatus.STOPPING.value,
+            LabInstanceStatus.DESTROYING.value,
+        }:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Active lab cannot be hard-deleted; stop or destroy it first",
+            )
+        if await self.repository.count_attempts_for_lab(lab.id) > 0:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Lab is linked to a ticket attempt; delete the attempt first or keep lab history",
+            )
+        lab_directory = Path(lab.lab_directory).resolve()
+        self.directory_manager.validate_inside_lab_root(lab_directory)
+        if lab_directory.exists():
+            shutil.rmtree(lab_directory)
+        await self.repository.delete_lab_with_children(lab)
+        await self.repository.commit()
 
     async def list_nodes(self, actor: User, lab_id: uuid.UUID) -> list[LabNode]:
         lab = await self.get_lab(actor, lab_id)
