@@ -28,6 +28,14 @@ Blocked:
 7. Review, edit, validate, and activate the template before using it in tickets.
 8. Continue with the normal ticket, verification rule, student attempt, lab start, verification, and lab destroy workflow.
 
+## Topology Preview
+
+AI Lab Builder preview detail pages include a read-only topology diagram parsed from generated Containerlab YAML or the normalized LabPlan.
+
+Use it to review nodes and links before approval. Node click opens details only. Approval still creates an inactive `LabTemplate`; it does not deploy or start a lab.
+
+Students cannot access AI preview topology.
+
 ## MVP Limits
 
 - Categories: `Linux`, `BGP`, `OSPF`.

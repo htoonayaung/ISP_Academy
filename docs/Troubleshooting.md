@@ -187,6 +187,19 @@ If the page returns `409`, the backend is blocking an unsafe recovery action suc
 
 If cleanup is uncertain, the backend skips and warns instead of deleting.
 
+## Topology Diagram Missing
+
+If a template, lab, or AI preview page shows `Could not parse topology`, validate the Containerlab YAML or regenerate the AI preview.
+
+Supported link format:
+
+```yaml
+links:
+  - endpoints: ["r1:eth1", "r2:eth1"]
+```
+
+Unknown endpoints show warnings but should not crash the page. The topology viewer is read-only and does not provide router console access.
+
 ## Verification Stuck RUNNING
 
 Confirm the lab is `RUNNING`, the target node exists, and the worker is running:

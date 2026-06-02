@@ -61,6 +61,12 @@ Use `Edit` for corrections. Use `Deactivate` instead of hard delete when a rule 
 
 Open `Attempts` to review attempts for tickets you created. The view is read-only in this MVP. Students still control their own lab lifecycle and run verification from their own attempt page.
 
+## Topology Diagrams
+
+Instructors can view read-only topology diagrams for templates and labs they are allowed to access. AI Lab Builder preview pages also show topology previews before approval.
+
+Clicking a node shows details only. There is no console, terminal, config apply, or topology editor in this phase.
+
 ## View Student Flow
 
 For demo validation, use a student account to:

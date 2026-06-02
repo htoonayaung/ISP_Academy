@@ -10,7 +10,9 @@ from app.models.user import User
 from app.repositories.lab_templates import LabTemplateRepository
 from app.repositories.labs import LabRepository
 from app.schemas.lab_instance import LabCreate, LabEventRead, LabNodeRead, LabRead, LabStatusRead
+from app.schemas.topology import TopologyRead
 from app.services.lab_service import LabService
+from app.services.topology_parser import TopologyParser
 
 router = APIRouter(tags=["labs"])
 
@@ -43,6 +45,22 @@ async def get_lab(
     service: LabService = Depends(get_lab_service),
 ) -> LabInstance:
     return await service.get_lab(current_user, lab_id)
+
+
+@router.get("/{lab_id}/topology", response_model=TopologyRead)
+async def get_lab_topology(
+    lab_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: LabService = Depends(get_lab_service),
+) -> TopologyRead:
+    lab = await service.get_lab(current_user, lab_id)
+    template = await service.template_repository.get_by_id(lab.template_id)
+    if template is None:
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lab template not found")
+    nodes = await service.list_nodes(current_user, lab.id)
+    return TopologyParser().parse_containerlab_yaml(template.containerlab_yaml, runtime_nodes=nodes, actor=current_user)
 
 
 @router.post("/{lab_id}/start", response_model=LabRead)

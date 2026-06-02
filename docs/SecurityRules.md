@@ -154,6 +154,19 @@ Rules:
 - If cleanup is uncertain, skip and warn.
 - Container names and lab paths must come from DB or worker inspection, not raw user input.
 
+## Topology Viewer Safety
+
+Rules:
+
+- Topology parsing uses `yaml.safe_load` only.
+- Topology parsing never executes YAML or shell commands.
+- Topology APIs do not require Docker socket or Containerlab access.
+- Students can view only active template topology and their own lab topology.
+- Students cannot access AI Lab Builder preview topology.
+- Do not expose secrets or host file paths in topology responses.
+- Container names are hidden from students.
+- Topology diagrams are read-only; no drag/drop editor, console, web terminal, SSH runner, or config apply exists in this phase.
+
 ## Hidden Solution Protection
 
 Rules:

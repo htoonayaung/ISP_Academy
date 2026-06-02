@@ -8,8 +8,10 @@ import { CopyId } from "../../components/ui/CopyId";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Table, Td, Th } from "../../components/ui/Table";
+import { TopologyDiagram } from "../../components/topology/TopologyDiagram";
 import { api } from "../../lib/api";
 import { AILabBuilderApproval, AILabBuilderPreview } from "../../types/aiLabBuilder";
+import { Topology } from "../../types/topology";
 
 export function AiLabBuilderPreviewDetailPage() {
   const { id } = useParams();
@@ -18,14 +20,24 @@ export function AiLabBuilderPreviewDetailPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [isBusy, setIsBusy] = useState(false);
+  const [topology, setTopology] = useState<Topology | null>(null);
+  const [topologyError, setTopologyError] = useState("");
 
   async function load() {
     if (!id) return;
     try {
       setError("");
-      setPreview(await api<AILabBuilderPreview>(`/api/v1/ai-lab-builder/previews/${id}`));
+      const loadedPreview = await api<AILabBuilderPreview>(`/api/v1/ai-lab-builder/previews/${id}`);
+      setPreview(loadedPreview);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load preview");
+      return;
+    }
+    try {
+      setTopology(await api<Topology>(`/api/v1/ai-lab-builder/previews/${id}/topology`));
+      setTopologyError("");
+    } catch (err) {
+      setTopologyError("Could not parse topology.");
     }
   }
 
@@ -119,6 +131,11 @@ export function AiLabBuilderPreviewDetailPage() {
       </Card>
       <Card title="Generated Topology" subtitle="Containerlab YAML preview. No deployment occurs in Phase 8.">
         <pre className="max-h-96 overflow-auto rounded-md bg-slate-950 p-3 text-xs text-slate-50">{preview.generated_containerlab_yaml}</pre>
+      </Card>
+      <Card title="Topology Preview" subtitle="Read-only diagram parsed from generated topology. No deployment or console access occurs.">
+        {topologyError && <Alert message={topologyError} />}
+        {topology && topology.warnings.length > 0 && <div className="mb-3 space-y-2">{topology.warnings.map((warning) => <Alert key={warning} className="border-amber-200 bg-amber-50 text-amber-900" message={warning} />)}</div>}
+        {topology && <TopologyDiagram topology={topology} />}
       </Card>
       <Card title="Nodes and Links" subtitle="Generated plan summary.">
         <div className="grid gap-4 lg:grid-cols-2">

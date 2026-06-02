@@ -21,6 +21,14 @@ An attempt creates a linked lab instance in `CREATED` state.
 
 On the Attempt Detail page, click `Open linked lab`. The Lab Detail page shows status, nodes, lifecycle events, and action buttons.
 
+## View Topology
+
+Students can view read-only topology diagrams for published templates and their own lab instances.
+
+On a lab page, the diagram may show node status and management IP after the lab is running. Clicking a node opens a detail panel.
+
+Console access is not available yet. Students cannot access AI Lab Builder preview topology or other students' lab topology.
+
 ## Start Lab
 
 Click `Start`. The status changes to `STARTING` and then `RUNNING`.

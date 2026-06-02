@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-The current MVP is demo-ready and Phase 11A runtime operations are in place for safer internal use and controlled external demos.
+The current MVP is demo-ready and Phase 11B topology viewing is in place for safer internal use and controlled external demos.
 
 ## Current MVP Status
 
@@ -22,6 +22,7 @@ Completed:
 - Phase 9C management CRUD and operational cleanup.
 - Phase 10 production hardening scripts and operations documentation.
 - Phase 11A Lab Runtime Cleanup and Admin Operations.
+- Phase 11B read-only Topology Diagram Viewer.
 - Demo rehearsal and release freeze documentation for `v0.3.0-demo-ready`.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
@@ -191,6 +192,25 @@ Security boundary:
 - Frontend has no Docker socket.
 - Only `celery_worker` executes Containerlab/Docker operations.
 - Runtime cleanup skips uncertain or non-demo active resources.
+
+## Phase 11B Topology Diagram Viewer
+
+Lab topology diagrams are read-only visual aids for understanding labs before and after deployment.
+
+Supported topology sources:
+
+- LabTemplate Containerlab YAML.
+- LabInstance topology with cached runtime node status and management IP when available.
+- AI Lab Builder preview topology before approval.
+
+Behavior:
+
+- Clicking a node opens a detail panel.
+- The diagram is read-only.
+- There is no drag/drop editing.
+- There is no router console, SSH runner, or web terminal in this phase.
+- Students can see only topology for active templates and their own labs.
+- Students cannot access AI Lab Builder preview topology.
 
 ## AI Lab Builder V1
 
@@ -383,12 +403,13 @@ Before broader deployment, replace this with a narrower lab executor boundary.
 - AI Lab Builder v1 exists with mock provider and OpenAI-compatible provider abstraction. Real AI provider testing is pending.
 - AI-generated FRR startup configs are previewed, not automatically wired into full lab deployment.
 - Runtime Ops is Phase 11A-level only; orphan detection is conservative and cleanup is demo-restricted.
+- Topology viewer is read-only and uses a simple automatic layout; advanced topology editing is not implemented.
 - No AI Mentor yet.
 - Production hardening is Phase 10-level only; full HA, SSO, observability, and isolation are not implemented.
 - No automated frontend test suite yet.
 - No high availability.
 - No multi-tenant production isolation.
-- No topology diagram yet.
+- No topology editor yet.
 - No web terminal yet.
 
 ## Future UX Direction

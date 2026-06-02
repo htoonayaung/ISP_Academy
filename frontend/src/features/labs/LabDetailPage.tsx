@@ -9,9 +9,11 @@ import { CopyId } from "../../components/ui/CopyId";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { Table, Td, Th } from "../../components/ui/Table";
+import { TopologyDiagram } from "../../components/topology/TopologyDiagram";
 import { canDestroyLab, canStartLab, canStopLab, formatDate } from "../../lib/format";
 import { ApiRequestError } from "../../lib/api";
 import { Lab, LabEvent, LabNode } from "../../types/lab";
+import { Topology } from "../../types/topology";
 import { useAuth } from "../auth/authStore";
 import { labApi } from "./labApi";
 
@@ -31,6 +33,8 @@ export function LabDetailPage() {
   const [lab, setLab] = useState<Lab | null>(null);
   const [nodes, setNodes] = useState<LabNode[]>([]);
   const [events, setEvents] = useState<LabEvent[]>([]);
+  const [topology, setTopology] = useState<Topology | null>(null);
+  const [topologyError, setTopologyError] = useState("");
   const [error, setError] = useState("");
   const [actioning, setActioning] = useState(false);
   async function load() {
@@ -41,6 +45,13 @@ export function LabDetailPage() {
       setNodes(await labApi.nodes(id));
       setEvents(await labApi.events(id));
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to load lab"); }
+    try {
+      setTopology(await labApi.topology(id));
+      setTopologyError("");
+    } catch {
+      setTopologyError("Could not parse topology.");
+      setTopology(null);
+    }
   }
   useEffect(() => { load(); }, [id]);
   useEffect(() => {
@@ -75,6 +86,11 @@ export function LabDetailPage() {
       <p className={`mt-3 rounded-md px-3 py-2 text-sm ${lab.status === "RUNNING" ? "bg-emerald-50 text-emerald-800" : ["STARTING", "STOPPING", "DESTROYING"].includes(lab.status) ? "bg-amber-50 text-amber-800" : lab.status === "FAILED" ? "bg-rose-50 text-rose-800" : "bg-slate-50 text-slate-700"}`}>{progressText(lab.status)}</p>
       {lab.last_error && <p className="mt-3 text-sm text-rose-700">{lab.last_error}</p>}
     </Card>}
+    <Card title="Topology" subtitle="Read-only topology with runtime node status when available. Console access is not enabled in this phase.">
+      {topologyError && <Alert message={topologyError} />}
+      {topology?.warnings.map((warning) => <div className="mb-2" key={warning}><Alert className="border-amber-200 bg-amber-50 text-amber-900" message={warning} /></div>)}
+      {topology ? <TopologyDiagram topology={topology} /> : <EmptyState title="No topology data available." description="Topology appears after the lab template can be parsed." />}
+    </Card>
     <Card title="Nodes" subtitle="Lab-owned nodes only; no production network targets."><Table><thead><tr><Th>Name</Th><Th>Kind</Th><Th>Status</Th><Th>Management IPv4</Th></tr></thead><tbody>{nodes.map((node) => <tr key={node.id}><Td>{node.name}</Td><Td>{node.kind}</Td><Td><Badge value={node.status.toUpperCase()} /></Td><Td>{node.management_ipv4 || "-"}</Td></tr>)}</tbody></Table>{nodes.length === 0 && <EmptyState title="No nodes reported yet" description="Start the lab and wait until it is RUNNING to see node status." />}</Card>
     <Card title="Events" subtitle="Student-visible events are sanitized by the backend."><Table><thead><tr><Th>Type</Th><Th>Message</Th><Th>Output</Th><Th>Time</Th></tr></thead><tbody>{events.map((event) => <tr key={event.id}><Td>{event.event_type}</Td><Td>{event.message}</Td><Td><pre className="max-h-24 max-w-md overflow-auto whitespace-pre-wrap text-xs text-slate-600">{event.stdout || event.stderr || "-"}</pre></Td><Td>{formatDate(event.created_at)}</Td></tr>)}</tbody></Table>{events.length === 0 && <EmptyState title="No events yet" description="Lifecycle events will appear here after start, stop, or destroy actions." />}</Card>
   </div>;

@@ -138,6 +138,18 @@ Typed confirmations:
 
 Destroyed lab records may remain in the database for history. Use cleanup only for runtime files, not for learning history.
 
+## Topology Diagrams
+
+Admins can view read-only topology diagrams on:
+
+- Lab Template detail pages.
+- Lab detail pages.
+- AI Lab Builder preview detail pages.
+
+Click a node to inspect kind, role, image, status, management IP, and interfaces. Runtime status appears on Lab detail when worker inspection has reported nodes.
+
+Console access is intentionally disabled and will be added only in a future phase. Do not expect topology drag/drop or editing in this MVP phase.
+
 ## Review Attempts
 
 Open `Attempts` to inspect student attempts:

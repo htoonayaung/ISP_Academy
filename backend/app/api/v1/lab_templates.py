@@ -14,7 +14,9 @@ from app.schemas.lab_template import (
     LabTemplateUpdate,
     LabTemplateValidationResult,
 )
+from app.schemas.topology import TopologyRead
 from app.services.lab_template_service import LabTemplateService
+from app.services.topology_parser import TopologyParser
 
 router = APIRouter(tags=["lab-templates"])
 
@@ -47,6 +49,16 @@ async def get_lab_template(
     service: LabTemplateService = Depends(get_lab_template_service),
 ) -> LabTemplate:
     return await service.get_template(current_user, template_id)
+
+
+@router.get("/{template_id}/topology", response_model=TopologyRead)
+async def get_lab_template_topology(
+    template_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: LabTemplateService = Depends(get_lab_template_service),
+) -> TopologyRead:
+    template = await service.get_template(current_user, template_id)
+    return TopologyParser().parse_containerlab_yaml(template.containerlab_yaml, actor=current_user)
 
 
 @router.patch("/{template_id}", response_model=LabTemplateRead)

@@ -17,7 +17,9 @@ from app.schemas.ai import (
     AILabBuilderPreviewRead,
     AIProviderStatusRead,
 )
+from app.schemas.topology import TopologyRead
 from app.services.ai_lab_builder_service import AILabBuilderService
+from app.services.topology_parser import TopologyParser
 
 router = APIRouter(tags=["ai-lab-builder"])
 
@@ -70,6 +72,18 @@ async def get_ai_lab_preview(
     service: AILabBuilderService = Depends(get_ai_lab_builder_service),
 ) -> AILabBuilderPreview:
     return await service.get_preview(current_user, preview_id)
+
+
+@router.get("/previews/{preview_id}/topology", response_model=TopologyRead)
+async def get_ai_lab_preview_topology(
+    preview_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: AILabBuilderService = Depends(get_ai_lab_builder_service),
+) -> TopologyRead:
+    preview = await service.get_preview(current_user, preview_id)
+    if preview.generated_containerlab_yaml:
+        return TopologyParser().parse_containerlab_yaml(preview.generated_containerlab_yaml, actor=current_user)
+    return TopologyParser().parse_lab_plan(preview.lab_plan_json, actor=current_user)
 
 
 @router.post("/previews/{preview_id}/approve", response_model=AILabBuilderApprovalRead)
