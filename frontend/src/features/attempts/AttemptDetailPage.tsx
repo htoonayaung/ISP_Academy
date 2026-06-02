@@ -13,6 +13,7 @@ import { api } from "../../lib/api";
 import { Lab } from "../../types/lab";
 import { Ticket, TicketAttempt } from "../../types/ticket";
 import { VerificationRun } from "../../types/verification";
+import { useAuth } from "../auth/authStore";
 
 function Step({ number, title, active, done }: { number: number; title: string; active?: boolean; done?: boolean }) {
   return (
@@ -25,6 +26,7 @@ function Step({ number, title, active, done }: { number: number; title: string; 
 
 export function AttemptDetailPage() {
   const { id = "" } = useParams();
+  const { user } = useAuth();
   const [attempt, setAttempt] = useState<TicketAttempt | null>(null);
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [lab, setLab] = useState<Lab | null>(null);
@@ -32,16 +34,17 @@ export function AttemptDetailPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   async function load() {
+    if (!user) return;
     try {
       setError("");
-      const current = await api<TicketAttempt>(`/api/v1/my/attempts/${id}`);
+      const current = await api<TicketAttempt>(user?.role === "STUDENT" ? `/api/v1/my/attempts/${id}` : `/api/v1/attempts/${id}`);
       setAttempt(current);
       setTicket(await api<Ticket>(`/api/v1/tickets/${current.ticket_id}`));
       setLab(await api<Lab>(`/api/v1/labs/${current.lab_instance_id}`));
-      setRuns(await api<VerificationRun[]>(`/api/v1/my/attempts/${id}/verification-runs`));
+      setRuns(await api<VerificationRun[]>(user?.role === "STUDENT" ? `/api/v1/my/attempts/${id}/verification-runs` : `/api/v1/attempts/${id}/verification-runs`));
     } catch (err) { setError(err instanceof Error ? err.message : "Failed to load attempt"); }
   }
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => { load(); }, [id, user?.role]);
   useEffect(() => {
     if (!runs.some((run) => ["QUEUED", "RUNNING"].includes(run.status)) && !["STARTING", "STOPPING", "DESTROYING"].includes(lab?.status || "")) return;
     const timer = setInterval(load, 3000);
@@ -73,7 +76,7 @@ export function AttemptDetailPage() {
       {hasPassed && <p className="mt-3 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Great! Your lab passed verification.</p>}
       {hasFailed && <p className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">Some checks failed. Review the result and try again.</p>}
       {message && <p className="mt-3 text-sm text-slate-700">{message}</p>}
-      <Button className="mt-3 bg-teal-700 hover:bg-teal-800" disabled={lab.status !== "RUNNING" || isVerificationBusy} onClick={verify}>{isVerificationBusy ? "Verification running..." : "Run Verification"}</Button>
+      {user?.role === "STUDENT" ? <Button className="mt-3 bg-teal-700 hover:bg-teal-800" disabled={lab.status !== "RUNNING" || isVerificationBusy} onClick={verify}>{isVerificationBusy ? "Verification running..." : "Run Verification"}</Button> : <p className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-sm text-slate-700">Management view is read-only. Students run verification from their own attempt page.</p>}
     </Card>
     <Card title="Verification Runs" subtitle="Queued and running checks refresh automatically."><Table><thead><tr><Th>Run</Th><Th>Status</Th><Th>Results</Th></tr></thead><tbody>{runs.map((run) => <tr key={run.id}><Td><Link className="text-teal-700" to={`/verification-runs/${run.id}`}>{run.id.slice(0, 8)}</Link></Td><Td><Badge value={run.status} /></Td><Td>{run.results?.length || 0}</Td></tr>)}</tbody></Table>{runs.length === 0 && <EmptyState title="No verification runs yet" description="Run verification after the linked lab reaches RUNNING." />}</Card>
   </div>;

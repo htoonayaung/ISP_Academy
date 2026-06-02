@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from app.core.security import hash_password
 from app.models.user import User, UserRole
 from app.repositories.users import UserRepository
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserPasswordReset, UserUpdate
 
 
 class UserService:
@@ -77,6 +77,11 @@ class UserService:
         if actor.role == UserRole.ADMIN and data.role is not None:
             user.role = data.role
         if actor.role == UserRole.ADMIN and data.is_active is not None:
+            if is_self and data.is_active is False:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Current admin cannot deactivate their own account",
+                )
             user.is_active = data.is_active
 
         try:
@@ -91,6 +96,11 @@ class UserService:
 
     async def deactivate_user(self, actor: User, user_id: uuid.UUID) -> User:
         self._require_admin(actor)
+        if actor.id == user_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Current admin cannot deactivate their own account",
+            )
         user = await self.repository.get_by_id(user_id)
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -99,8 +109,17 @@ class UserService:
         await self.repository.refresh(user)
         return user
 
+    async def reset_password(self, actor: User, user_id: uuid.UUID, data: UserPasswordReset) -> User:
+        self._require_admin(actor)
+        user = await self.repository.get_by_id(user_id)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        user.hashed_password = hash_password(data.new_password)
+        await self.repository.commit()
+        await self.repository.refresh(user)
+        return user
+
     @staticmethod
     def _require_admin(actor: User) -> None:
         if actor.role != UserRole.ADMIN:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
-

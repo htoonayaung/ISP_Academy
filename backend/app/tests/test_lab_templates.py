@@ -102,3 +102,34 @@ async def test_admin_can_validate_template(
     assert response.json()["is_valid"] is True
     assert response.json()["errors"] == []
 
+
+async def test_admin_can_duplicate_template_as_inactive_copy(
+    client: AsyncClient,
+    admin_token: str,
+    active_template,
+    auth_header,
+) -> None:
+    response = await client.post(
+        f"/api/v1/lab-templates/{active_template.id}/duplicate",
+        headers=auth_header(admin_token),
+    )
+
+    assert response.status_code == 201
+    payload = response.json()
+    assert payload["name"] == "Copy of Active Lab"
+    assert payload["is_active"] is False
+    assert payload["containerlab_yaml"] == active_template.containerlab_yaml
+
+
+async def test_student_cannot_duplicate_template(
+    client: AsyncClient,
+    student_token: str,
+    active_template,
+    auth_header,
+) -> None:
+    response = await client.post(
+        f"/api/v1/lab-templates/{active_template.id}/duplicate",
+        headers=auth_header(student_token),
+    )
+
+    assert response.status_code == 403

@@ -29,6 +29,17 @@ Reset requires typing `RESET_DEMO_DATA` and targets demo-prefixed data only. Do 
 
 Admins can create `ADMIN`, `INSTRUCTOR`, and `STUDENT` users. Only admins should change roles or deactivate users.
 
+## Manage Users Safely
+
+Use the `Users` actions column for routine account operations:
+
+- `View/Edit` updates profile fields, role, and active state.
+- `Deactivate` disables login without deleting history.
+- `Reactivate` restores login for an inactive account.
+- `Reset Password` sets a new password through an admin-only backend endpoint. Passwords are never displayed after reset.
+
+The current admin account cannot deactivate itself. Create a second admin account before rotating or disabling the original admin.
+
 ## Create Lab Templates
 
 1. Open `Lab Templates`.
@@ -38,6 +49,18 @@ Admins can create `ADMIN`, `INSTRUCTOR`, and `STUDENT` users. Only admins should
 5. Save.
 
 Use only allowed MVP images and kinds. Do not use host mounts, external networks, privileged containers, or production network targets.
+
+## Manage Lab Templates Safely
+
+Use template actions for operational cleanup:
+
+- `Edit` changes metadata, resource estimates, and YAML after backend validation.
+- `Validate` checks Containerlab YAML without starting a lab.
+- `Activate` makes a template available for tickets and students.
+- `Deactivate` hides a template from new student use while keeping history.
+- `Duplicate` creates an inactive copy owned by the current user.
+
+Avoid hard deletion for templates referenced by tickets or lab history. Deactivate instead.
 
 ## Validate Templates
 
@@ -60,6 +83,7 @@ The hidden solution is visible only to authorized staff and must not appear in t
 ## Publish Or Archive Tickets
 
 - Use `Publish` to make a ticket visible to students.
+- Use `Unpublish` to return a ticket to `DRAFT`.
 - Use `Archive` to remove it from the student list.
 - Confirm destructive or visibility-changing actions before proceeding.
 
@@ -73,6 +97,8 @@ The hidden solution is visible only to authorized staff and must not appear in t
 
 Rules run only against lab-owned nodes in a student's running lab attempt.
 
+Use `Edit` to tune a rule. Use `Deactivate` instead of hard delete so older verification history remains understandable.
+
 ## Monitor Labs
 
 Open `Labs` to inspect lab status. Use Lab Detail to view:
@@ -83,3 +109,13 @@ Open `Labs` to inspect lab status. Use Lab Detail to view:
 - Start, Stop, and Destroy actions when allowed.
 
 Destroy demo labs after use to release server resources.
+
+## Review Attempts
+
+Open `Attempts` to inspect student attempts:
+
+- Admins see all attempts.
+- Instructors see attempts for their own tickets.
+- Students see only their own attempts.
+
+Attempt management is read-only in this MVP. Do not reset or remove attempt history manually.

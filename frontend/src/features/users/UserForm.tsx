@@ -27,8 +27,8 @@ export function UserForm({ user, onSubmit }: { user?: User; onSubmit: (data: Rec
       setError("Email and full name are required.");
       return;
     }
-    if (!user && data.password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    if (!user && data.password.length < 10) {
+      setError("Password must be at least 10 characters.");
       return;
     }
     const payload: Record<string, unknown> = { ...data };

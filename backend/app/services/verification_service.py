@@ -110,6 +110,20 @@ class VerificationService:
         attempt = await self._get_own_attempt(actor, attempt_id)
         return await self.repository.list_runs_for_attempt(attempt.id)
 
+    async def list_runs_for_attempt_management(self, actor: User, attempt_id: uuid.UUID) -> list[VerificationRun]:
+        attempt = await self.ticket_repository.get_attempt_by_id(attempt_id)
+        if attempt is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket attempt not found")
+        if actor.role == UserRole.ADMIN:
+            return await self.repository.list_runs_for_attempt(attempt.id)
+        if actor.role == UserRole.INSTRUCTOR:
+            ticket = await self.ticket_repository.get_by_id(attempt.ticket_id)
+            if ticket is not None and ticket.created_by == actor.id:
+                return await self.repository.list_runs_for_attempt(attempt.id)
+        if actor.role == UserRole.STUDENT and attempt.student_id == actor.id:
+            return await self.repository.list_runs_for_attempt(attempt.id)
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
     async def get_run(self, actor: User, run_id: uuid.UUID) -> VerificationRun:
         run = await self.repository.get_run_by_id(run_id)
         if run is None:

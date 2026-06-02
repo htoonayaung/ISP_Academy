@@ -43,6 +43,7 @@ No authentication, user, lab, ticket, verification, AI, mentor, admin, or instru
 | Phase 2 | `GET` | `/api/v1/users/{user_id}` | View user. | Admin, Instructor limited, self |
 | Phase 2 | `PATCH` | `/api/v1/users/{user_id}` | Update user. | Admin, self limited |
 | Phase 2 | `DELETE` | `/api/v1/users/{user_id}` | Deactivate/delete user. | Admin |
+| Phase 9C | `POST` | `/api/v1/users/{user_id}/reset-password` | Reset a user's password without returning plaintext. | Admin |
 
 ## Lab Templates
 
@@ -53,6 +54,7 @@ No authentication, user, lab, ticket, verification, AI, mentor, admin, or instru
 | Phase 3 | `GET` | `/api/v1/lab-templates/{template_id}` | View lab template. | Admin, Instructor, Student active-only |
 | Phase 3 | `PATCH` | `/api/v1/lab-templates/{template_id}` | Update lab template. | Admin, owner Instructor |
 | Phase 3 | `DELETE` | `/api/v1/lab-templates/{template_id}` | Delete/deactivate lab template. | Admin, owner Instructor |
+| Phase 9C | `POST` | `/api/v1/lab-templates/{template_id}/duplicate` | Create an inactive copy of a template. | Admin, Instructor |
 | Phase 3 | `POST` | `/api/v1/lab-templates/{template_id}/validate` | Validate template YAML and safety rules. | Admin, owner Instructor |
 
 ## Labs
@@ -83,6 +85,8 @@ No authentication, user, lab, ticket, verification, AI, mentor, admin, or instru
 | Phase 5 | `POST` | `/api/v1/tickets/{ticket_id}/start` | Start student attempt and lab. | Student |
 | Phase 5 | `GET` | `/api/v1/my/attempts` | List own attempts. | Student |
 | Phase 5 | `GET` | `/api/v1/my/attempts/{attempt_id}` | View own attempt. | Student |
+| Phase 9C | `GET` | `/api/v1/attempts` | List attempts using role-scoped management visibility. | Admin all, Instructor own-ticket, Student own |
+| Phase 9C | `GET` | `/api/v1/attempts/{attempt_id}` | View role-scoped attempt detail. | Admin, Instructor scoped, Student owner |
 
 ## Verification
 
@@ -95,6 +99,7 @@ No authentication, user, lab, ticket, verification, AI, mentor, admin, or instru
 | Phase 6 | `POST` | `/api/v1/my/attempts/{attempt_id}/verify` | Queue verification run. | Student owner |
 | Phase 6 | `GET` | `/api/v1/my/attempts/{attempt_id}/verification-runs` | List own verification runs. | Student owner |
 | Phase 6 | `GET` | `/api/v1/my/verification-runs/{run_id}` | View own verification run. | Student owner |
+| Phase 9C | `GET` | `/api/v1/attempts/{attempt_id}/verification-runs` | List verification runs for role-scoped attempt management. | Admin, Instructor scoped, Student owner |
 
 ## AI Lab Builder
 

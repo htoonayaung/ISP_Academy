@@ -46,6 +46,22 @@ localStorage.removeItem("isp_academy_token")
 
 If `/api/v1/auth/me` returns `401`, log in again.
 
+## Management Action Fails
+
+If a management action returns `403`, confirm the current role is allowed:
+
+- Only Admin can deactivate/reactivate users and reset passwords.
+- Instructors can manage only their own templates, tickets, verification rules, and related attempts.
+- Students cannot see staff action buttons and cannot call staff endpoints.
+
+If an action returns `409`, it is usually a safety guard:
+
+- The current admin cannot deactivate itself.
+- A ticket cannot be published unless its lab template is active.
+- A lab cannot start, stop, or destroy from an unsafe lifecycle state.
+
+Use deactivate/archive instead of hard delete for normal cleanup.
+
 ## CORS Issue
 
 Confirm `CORS_ORIGINS` includes the frontend URL:

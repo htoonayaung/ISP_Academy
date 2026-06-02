@@ -128,6 +128,29 @@ class LabTemplateService:
         await self.repository.refresh(template)
         return template
 
+    async def duplicate_template(self, actor: User, template_id: uuid.UUID) -> LabTemplate:
+        template = await self.get_template(actor, template_id)
+        self._require_admin_or_instructor(actor)
+        name = f"Copy of {template.name}"
+        duplicate = LabTemplate(
+            name=name,
+            slug=await self._unique_slug(name),
+            description=template.description,
+            category=template.category,
+            difficulty=template.difficulty,
+            containerlab_yaml=template.containerlab_yaml,
+            default_startup_config=template.default_startup_config,
+            estimated_cpu=template.estimated_cpu,
+            estimated_memory_mb=template.estimated_memory_mb,
+            estimated_duration_minutes=template.estimated_duration_minutes,
+            is_active=False,
+            created_by=actor.id,
+        )
+        created = await self.repository.create(duplicate)
+        await self.repository.commit()
+        await self.repository.refresh(created)
+        return created
+
     async def validate_template(
         self,
         actor: User,
@@ -168,4 +191,3 @@ class LabTemplateService:
         if actor.role == UserRole.INSTRUCTOR and template.created_by == actor.id:
             return
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
-

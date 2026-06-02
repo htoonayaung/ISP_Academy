@@ -103,6 +103,8 @@ Rules:
 Admin:
 
 - Can manage users.
+- Can reset user passwords without seeing plaintext passwords.
+- Cannot deactivate the currently logged-in admin account.
 - Can view all labs, tickets, attempts, audit logs.
 - Can manage all templates and tickets.
 
@@ -122,6 +124,18 @@ Student:
 - Cannot view hidden solutions.
 - Cannot view other students' command history.
 - Cannot use AI Lab Builder v1.
+
+## Safe Management Actions
+
+Rules:
+
+- Users are deactivated/reactivated, not hard-deleted from the management UI.
+- Ticket `Delete` behavior is treated as archive in the MVP.
+- Tickets can be unpublished back to `DRAFT` or archived; archived tickets are hidden from students.
+- Lab templates are activated/deactivated; duplicate templates are created inactive by default.
+- Verification rule delete is a soft deactivate so historical run data remains readable.
+- Destroyed lab records remain as history. Lab cleanup must not remove files outside `LAB_ROOT`.
+- Destructive or visibility-changing actions require UI confirmation and backend permission checks.
 
 ## Hidden Solution Protection
 

@@ -49,11 +49,13 @@ export function App() {
           <Route path="/labs/:id" element={<LabDetailPage />} />
           <Route path="/tickets" element={<TicketsPage />} />
           <Route path="/tickets/:id" element={<TicketDetailPage />} />
-          <Route element={<RoleRoute roles={["ADMIN", "STUDENT"]} />}>
+          <Route element={<RoleRoute roles={["ADMIN", "INSTRUCTOR", "STUDENT"]} />}>
             <Route path="/attempts" element={<MyAttemptsPage />} />
           </Route>
-          <Route element={<RoleRoute roles={["STUDENT"]} />}>
+          <Route element={<RoleRoute roles={["ADMIN", "INSTRUCTOR", "STUDENT"]} />}>
             <Route path="/attempts/:id" element={<AttemptDetailPage />} />
+          </Route>
+          <Route element={<RoleRoute roles={["STUDENT"]} />}>
             <Route path="/verification-runs/:id" element={<VerificationRunPage />} />
           </Route>
           <Route path="*" element={<NotFoundPage />} />

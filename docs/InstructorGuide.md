@@ -15,6 +15,8 @@ Open `http://10.0.44.2:3000` and log in with an instructor account. The sidebar 
 
 Templates must stay inside the allowed MVP safety scope. Do not use host mounts, external networks, arbitrary images, or privileged containers.
 
+Use `Activate` only after validation passes and the template is ready for tickets. Use `Deactivate` to remove a template from new student use without deleting history. Use `Duplicate` to create an inactive copy for revisions.
+
 ## Create Tickets
 
 1. Open `Tickets`.
@@ -35,6 +37,8 @@ Always verify as a student that hidden solution text is not visible.
 
 Use `Publish` when the template, instructions, and verification rules are ready. Published tickets appear in the student ticket list.
 
+Use `Unpublish` to return a ticket to draft when it needs revision.
+
 Use `Archive` when a ticket should no longer be available to students.
 
 ## Create Verification Rules
@@ -50,6 +54,12 @@ Example:
 - Command: `echo ok`
 - Assertion type: `CONTAINS`
 - Expected value: `ok`
+
+Use `Edit` for corrections. Use `Deactivate` instead of hard delete when a rule should no longer run; old verification runs remain stored.
+
+## Review Attempts
+
+Open `Attempts` to review attempts for tickets you created. The view is read-only in this MVP. Students still control their own lab lifecycle and run verification from their own attempt page.
 
 ## View Student Flow
 

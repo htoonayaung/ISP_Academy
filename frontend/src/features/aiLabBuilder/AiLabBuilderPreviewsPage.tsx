@@ -25,6 +25,20 @@ export function AiLabBuilderPreviewsPage() {
 
   useEffect(() => { load(); }, []);
 
+  async function act(preview: AILabBuilderPreview, action: "approve" | "reject" | "delete") {
+    const label = action === "approve" ? "Approve this preview and create an inactive LabTemplate?" : action === "reject" ? "Reject this preview?" : "Delete this preview?";
+    if (!confirm(label)) return;
+    try {
+      setError("");
+      if (action === "approve") await api(`/api/v1/ai-lab-builder/previews/${preview.id}/approve`, { method: "POST" });
+      if (action === "reject") await api(`/api/v1/ai-lab-builder/previews/${preview.id}/reject`, { method: "POST" });
+      if (action === "delete") await api(`/api/v1/ai-lab-builder/previews/${preview.id}`, { method: "DELETE" });
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Preview action failed");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <PageHeader
@@ -44,7 +58,7 @@ export function AiLabBuilderPreviewsPage() {
                 <Td><Badge value={preview.validation_status} /></Td>
                 <Td><Badge value={preview.status} /></Td>
                 <Td>{new Date(preview.created_at).toLocaleString()}</Td>
-                <Td><Link to={`/ai-lab-builder/previews/${preview.id}`}><Button>Open</Button></Link></Td>
+                <Td><div className="flex flex-wrap gap-2"><Link to={`/ai-lab-builder/previews/${preview.id}`}><Button>Open</Button></Link><Button disabled={preview.validation_status !== "PASSED" || ["APPROVED", "REJECTED"].includes(preview.status)} onClick={() => act(preview, "approve")}>Approve</Button><Button disabled={preview.status === "REJECTED"} onClick={() => act(preview, "reject")}>Reject</Button><Button disabled={preview.status === "APPROVED"} className="bg-rose-700 hover:bg-rose-800" onClick={() => act(preview, "delete")}>Delete</Button></div></Td>
               </tr>
             ))}
           </tbody>

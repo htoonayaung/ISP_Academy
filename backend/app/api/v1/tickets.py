@@ -15,6 +15,7 @@ from app.services.ticket_service import TicketService
 
 router = APIRouter(tags=["tickets"])
 my_router = APIRouter(tags=["my-attempts"])
+attempts_router = APIRouter(tags=["attempts"])
 
 
 def get_ticket_service(session: AsyncSession = Depends(get_db_session)) -> TicketService:
@@ -119,3 +120,20 @@ async def get_my_attempt(
     service: TicketService = Depends(get_ticket_service),
 ) -> TicketAttempt:
     return await service.get_my_attempt(current_user, attempt_id)
+
+
+@attempts_router.get("", response_model=list[TicketAttemptRead])
+async def list_attempts(
+    current_user: User = Depends(get_current_user),
+    service: TicketService = Depends(get_ticket_service),
+) -> list[TicketAttempt]:
+    return await service.list_attempts(current_user)
+
+
+@attempts_router.get("/{attempt_id}", response_model=TicketAttemptRead)
+async def get_attempt(
+    attempt_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: TicketService = Depends(get_ticket_service),
+) -> TicketAttempt:
+    return await service.get_attempt(current_user, attempt_id)

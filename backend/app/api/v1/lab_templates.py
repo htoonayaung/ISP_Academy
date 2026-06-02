@@ -68,6 +68,15 @@ async def deactivate_lab_template(
     return await service.deactivate_template(current_user, template_id)
 
 
+@router.post("/{template_id}/duplicate", response_model=LabTemplateRead, status_code=status.HTTP_201_CREATED)
+async def duplicate_lab_template(
+    template_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: LabTemplateService = Depends(get_lab_template_service),
+) -> LabTemplate:
+    return await service.duplicate_template(current_user, template_id)
+
+
 @router.post("/{template_id}/validate", response_model=LabTemplateValidationResult)
 async def validate_lab_template(
     template_id: uuid.UUID,
@@ -75,4 +84,3 @@ async def validate_lab_template(
     service: LabTemplateService = Depends(get_lab_template_service),
 ) -> LabTemplateValidationResult:
     return await service.validate_template(current_user, template_id)
-

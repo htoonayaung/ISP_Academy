@@ -60,6 +60,19 @@ class TicketRepository:
         )
         return list(result.scalars().all())
 
+    async def list_attempts_all(self) -> list[TicketAttempt]:
+        result = await self.session.execute(select(TicketAttempt).order_by(TicketAttempt.created_at.desc()))
+        return list(result.scalars().all())
+
+    async def list_attempts_for_ticket_owner(self, owner_id: uuid.UUID) -> list[TicketAttempt]:
+        result = await self.session.execute(
+            select(TicketAttempt)
+            .join(Ticket, Ticket.id == TicketAttempt.ticket_id)
+            .where(Ticket.created_by == owner_id)
+            .order_by(TicketAttempt.created_at.desc())
+        )
+        return list(result.scalars().all())
+
     async def commit(self) -> None:
         await self.session.commit()
 

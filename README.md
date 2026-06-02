@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-The current MVP is demo-ready. Phase 9B polished the browser demo journey, and the release freeze package documents rehearsal, backup, architecture, and tagging for `v0.3.0-demo-ready`.
+The current MVP is demo-ready. Phase 9C adds safer management actions for users, templates, tickets, verification rules, labs, attempts, and AI previews before Phase 10 production hardening.
 
 ## Current MVP Status
 
@@ -19,6 +19,7 @@ Completed:
 - AI Lab Builder v1 preview, validation, and approval into inactive lab templates.
 - Admin-only Demo Setup Wizard for repeatable MVP demos.
 - Phase 9B polished browser demo flow for the student ticket, lab, verification, and destroy journey.
+- Phase 9C management CRUD and operational cleanup.
 - Demo rehearsal and release freeze documentation for `v0.3.0-demo-ready`.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
@@ -234,6 +235,26 @@ Expected browser behavior:
 - Student never sees Demo Setup, AI Lab Builder, or hidden solution text.
 - Lab lifecycle buttons are disabled during STARTING, STOPPING, and DESTROYING.
 - Verification is disabled until the linked lab is RUNNING.
+
+## Phase 9C Management Cleanup
+
+Phase 9C completes safe operational actions in the management UI:
+
+- Users: edit, deactivate, reactivate, and admin-only reset password.
+- Lab templates: edit, validate, activate, deactivate, and duplicate as inactive copy.
+- Tickets: edit, publish, unpublish to draft, and archive.
+- Verification rules: create, edit, deactivate, and reactivate.
+- Labs: filter by state, refresh, start, stop, and destroy with confirmation.
+- Attempts: admin sees all attempts, instructors see attempts for their own tickets, students see only their own attempts.
+- AI previews: view, approve valid previews, reject, and delete when allowed.
+
+Safe-delete behavior:
+
+- Users are deactivated, not hard-deleted.
+- Templates are deactivated when they should not be used for new tickets.
+- Ticket delete behavior is archive-oriented in the MVP.
+- Verification rule delete is a soft deactivate so old verification history remains readable.
+- Destroyed lab records remain visible as history.
 
 ## Backup
 

@@ -27,6 +27,10 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class UserPasswordReset(BaseModel):
+    new_password: str = Field(min_length=10, max_length=255)
+
+
 class UserRead(BaseModel):
     id: uuid.UUID
     email: EmailStr
@@ -38,4 +42,3 @@ class UserRead(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-

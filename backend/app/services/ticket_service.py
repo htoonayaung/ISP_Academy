@@ -138,6 +138,28 @@ class TicketService:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only students can view own attempts")
         return await self.repository.list_attempts_by_student(actor.id)
 
+    async def list_attempts(self, actor: User) -> list[TicketAttempt]:
+        if actor.role == UserRole.ADMIN:
+            return await self.repository.list_attempts_all()
+        if actor.role == UserRole.INSTRUCTOR:
+            return await self.repository.list_attempts_for_ticket_owner(actor.id)
+        return await self.repository.list_attempts_by_student(actor.id)
+
+    async def get_attempt(self, actor: User, attempt_id: uuid.UUID) -> TicketAttempt:
+        attempt = await self.repository.get_attempt_by_id(attempt_id)
+        if attempt is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket attempt not found")
+        if actor.role == UserRole.ADMIN:
+            return attempt
+        if actor.role == UserRole.INSTRUCTOR:
+            ticket = await self.repository.get_by_id(attempt.ticket_id)
+            if ticket is not None and ticket.created_by == actor.id:
+                return attempt
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        if attempt.student_id == actor.id:
+            return attempt
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+
     async def get_my_attempt(self, actor: User, attempt_id: uuid.UUID) -> TicketAttempt:
         if actor.role != UserRole.STUDENT:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only students can view own attempts")

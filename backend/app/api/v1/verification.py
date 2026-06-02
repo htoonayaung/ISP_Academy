@@ -63,6 +63,16 @@ async def delete_verification_rule(
     return await service.delete_rule(current_user, rule_id)
 
 
+@router.get("/attempts/{attempt_id}/verification-runs", response_model=list[VerificationRunRead])
+async def list_attempt_verification_runs(
+    attempt_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    service: VerificationService = Depends(get_verification_service),
+) -> list[VerificationRunRead]:
+    runs = await service.list_runs_for_attempt_management(current_user, attempt_id)
+    return [VerificationRunRead.model_validate(run) for run in runs]
+
+
 @my_router.post("/attempts/{attempt_id}/verify", response_model=VerificationRunRead, status_code=status.HTTP_201_CREATED)
 async def run_verification(
     attempt_id: uuid.UUID,
