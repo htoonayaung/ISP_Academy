@@ -55,7 +55,9 @@ docker ps --filter "name=clab"
 du -sh /opt/isp-academy/lab-storage
 ```
 
-Destroy demo labs from the UI. Do not manually delete outside `LAB_ROOT`.
+Destroy demo labs from the UI. If a demo lab is stuck, open `Lab Runtime` as Admin and use `Refresh` first, then `Retry destroy` or `Force destroy demo` only when eligible. Do not manually delete outside `LAB_ROOT`.
+
+Use `Cleanup demo runtime` only after verifying it is restricted to demo-prefixed destroyed or failed artifacts.
 
 ## Log Checks
 

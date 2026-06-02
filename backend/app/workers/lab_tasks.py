@@ -1,12 +1,15 @@
 import asyncio
 import uuid
+import shutil
 from datetime import UTC, datetime
+from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.adapters.containerlab_adapter import ContainerlabAdapter
 from app.db.session import async_session_factory
 from app.lab_runtime.status_parser import parse_containerlab_nodes
+from app.lab_runtime.directory_manager import LabDirectoryManager
 from app.models.lab_instance import LabEvent, LabInstanceStatus
 from app.models import lab_template, user  # noqa: F401
 from app.repositories.labs import LabRepository
@@ -31,6 +34,16 @@ def destroy_lab_task(lab_id: str, actor_id: str | None = None) -> None:
 @celery_app.task(name="app.workers.lab_tasks.refresh_lab_status_task")
 def refresh_lab_status_task(lab_id: str) -> None:
     asyncio.run(_refresh_lab(uuid.UUID(lab_id)))
+
+
+@celery_app.task(name="app.workers.lab_tasks.force_destroy_demo_lab_task")
+def force_destroy_demo_lab_task(lab_id: str, actor_id: str | None = None) -> None:
+    asyncio.run(_force_destroy_demo_lab(uuid.UUID(lab_id), _optional_uuid(actor_id)))
+
+
+@celery_app.task(name="app.workers.lab_tasks.cleanup_demo_runtime_task")
+def cleanup_demo_runtime_task() -> None:
+    asyncio.run(_cleanup_demo_runtime())
 
 
 async def _start_lab(lab_id: uuid.UUID, actor_id: uuid.UUID | None) -> None:
@@ -103,6 +116,65 @@ async def _refresh_lab(lab_id: uuid.UUID) -> None:
         if lab is None:
             return
         await _refresh_nodes(session, repository, ContainerlabAdapter(), lab)
+
+
+async def _force_destroy_demo_lab(lab_id: uuid.UUID, actor_id: uuid.UUID | None) -> None:
+    async with async_session_factory() as session:
+        repository = LabRepository(session)
+        lab = await repository.get_by_id(lab_id)
+        if lab is None or not lab.lab_name.startswith("isp-demo-"):
+            return
+        adapter = ContainerlabAdapter()
+        result = adapter.destroy(lab)
+        if result.ok:
+            lab.status = LabInstanceStatus.DESTROYED.value
+            lab.destroyed_at = datetime.now(UTC)
+            lab.last_error = None
+            await repository.replace_nodes(lab.id, [])
+            await repository.add_event(
+                _event(
+                    lab.id,
+                    "LAB_RECOVERY_DEMO_FORCE_DESTROYED",
+                    "Demo lab force destroy succeeded",
+                    result.stdout,
+                    result.stderr,
+                    actor_id,
+                )
+            )
+        else:
+            lab.status = LabInstanceStatus.FAILED.value
+            lab.last_error = "Demo force destroy failed"
+            await repository.add_event(_event(lab.id, "LAB_FAILED", lab.last_error, result.stdout, result.stderr, actor_id))
+        await repository.commit()
+
+
+async def _cleanup_demo_runtime() -> None:
+    async with async_session_factory() as session:
+        repository = LabRepository(session)
+        manager = LabDirectoryManager()
+        labs = await repository.list_all()
+        for lab in labs:
+            if not lab.lab_name.startswith("isp-demo-"):
+                continue
+            if lab.status not in {LabInstanceStatus.DESTROYED.value, LabInstanceStatus.FAILED.value}:
+                continue
+            directory = Path(lab.lab_directory).resolve()
+            manager.validate_inside_lab_root(directory)
+            removed = False
+            if directory.exists():
+                shutil.rmtree(directory)
+                removed = True
+            await repository.add_event(
+                _event(
+                    lab.id,
+                    "LAB_DEMO_RUNTIME_CLEANED",
+                    "Demo runtime directory removed" if removed else "Demo runtime directory was already absent",
+                    None,
+                    None,
+                    None,
+                )
+            )
+        await repository.commit()
 
 
 async def _refresh_nodes(session: AsyncSession, repository: LabRepository, adapter: ContainerlabAdapter, lab) -> None:

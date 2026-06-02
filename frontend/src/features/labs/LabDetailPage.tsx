@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -12,6 +12,7 @@ import { Table, Td, Th } from "../../components/ui/Table";
 import { canDestroyLab, canStartLab, canStopLab, formatDate } from "../../lib/format";
 import { ApiRequestError } from "../../lib/api";
 import { Lab, LabEvent, LabNode } from "../../types/lab";
+import { useAuth } from "../auth/authStore";
 import { labApi } from "./labApi";
 
 function progressText(status: string): string {
@@ -26,6 +27,7 @@ function progressText(status: string): string {
 
 export function LabDetailPage() {
   const { id = "" } = useParams();
+  const { user } = useAuth();
   const [lab, setLab] = useState<Lab | null>(null);
   const [nodes, setNodes] = useState<LabNode[]>([]);
   const [events, setEvents] = useState<LabEvent[]>([]);
@@ -62,11 +64,13 @@ export function LabDetailPage() {
   return <div className="space-y-4">
     {lab && <PageHeader title={lab.lab_name} subtitle="Manage the lab lifecycle and inspect node/event state." action={<CopyId id={lab.id} label="Lab ID" />} />}
     {error && <Alert message={error} />}
+    {lab && user?.role === "ADMIN" && ["STARTING", "STOPPING", "DESTROYING"].includes(lab.status) && <Alert className="border-amber-200 bg-amber-50 text-amber-900" message="This lab is in a transient runtime state. Use Lab Runtime if it remains stuck after refresh." />}
     {lab && <Card title={lab.lab_name} subtitle="Use the lifecycle buttons in order. State changes refresh automatically." action={<div className="text-lg"><Badge value={lab.status} /></div>}>
       <div className="flex flex-wrap gap-2">
         <Button disabled={actioning || !canStartLab(lab.status)} onClick={() => action(labApi.start)}>Start</Button>
         <Button disabled={actioning || !canStopLab(lab.status)} onClick={() => action(labApi.stop)}>Stop</Button>
         <Button disabled={actioning || !canDestroyLab(lab.status)} className="bg-rose-700 hover:bg-rose-800" onClick={() => confirm("Destroy lab?") && action(labApi.destroy)}>Destroy</Button>
+        {user?.role === "ADMIN" && <Link className="inline-flex min-h-9 items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700" to="/admin/runtime">Runtime Ops</Link>}
       </div>
       <p className={`mt-3 rounded-md px-3 py-2 text-sm ${lab.status === "RUNNING" ? "bg-emerald-50 text-emerald-800" : ["STARTING", "STOPPING", "DESTROYING"].includes(lab.status) ? "bg-amber-50 text-amber-800" : lab.status === "FAILED" ? "bg-rose-50 text-rose-800" : "bg-slate-50 text-slate-700"}`}>{progressText(lab.status)}</p>
       {lab.last_error && <p className="mt-3 text-sm text-rose-700">{lab.last_error}</p>}

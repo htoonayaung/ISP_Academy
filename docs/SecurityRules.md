@@ -137,6 +137,23 @@ Rules:
 - Destroyed lab records remain as history. Lab cleanup must not remove files outside `LAB_ROOT`.
 - Destructive or visibility-changing actions require UI confirmation and backend permission checks.
 
+## Runtime Recovery Safety
+
+Rules:
+
+- Runtime admin APIs are Admin-only.
+- Students and instructors cannot access global runtime cleanup.
+- Runtime status must not require Docker socket access in the API container.
+- Worker-only Containerlab/Docker execution boundary remains unchanged.
+- Recovery uses typed confirmations.
+- `mark_failed` changes DB state only and creates a lab event.
+- `retry_destroy` queues the existing safe worker destroy task.
+- `force_destroy_demo_only` is restricted to demo-prefixed labs.
+- Demo cleanup removes only demo-prefixed destroyed or failed runtime artifacts when paths remain inside `LAB_ROOT`.
+- No global wipe or unsafe hard delete is allowed.
+- If cleanup is uncertain, skip and warn.
+- Container names and lab paths must come from DB or worker inspection, not raw user input.
+
 ## Hidden Solution Protection
 
 Rules:

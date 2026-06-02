@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-The current MVP is demo-ready and Phase 10 production hardening documentation/scripts are in place for safer internal use and controlled external demos.
+The current MVP is demo-ready and Phase 11A runtime operations are in place for safer internal use and controlled external demos.
 
 ## Current MVP Status
 
@@ -21,6 +21,7 @@ Completed:
 - Phase 9B polished browser demo flow for the student ticket, lab, verification, and destroy journey.
 - Phase 9C management CRUD and operational cleanup.
 - Phase 10 production hardening scripts and operations documentation.
+- Phase 11A Lab Runtime Cleanup and Admin Operations.
 - Demo rehearsal and release freeze documentation for `v0.3.0-demo-ready`.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
@@ -162,6 +163,34 @@ Phase 10 docs:
 - [Reverse Proxy Guide](docs/ReverseProxyGuide.md)
 - [Password Rotation Guide](docs/PasswordRotationGuide.md)
 - [Backup And Restore](docs/BackupRestore.md)
+
+## Phase 11A Lab Runtime Operations
+
+Admins can open `http://10.0.44.2:3000/admin/runtime` to inspect and safely recover runtime lab problems.
+
+Runtime Ops includes:
+
+- Lab status counts by lifecycle state.
+- Stuck `STARTING`, `STOPPING`, and `DESTROYING` candidates.
+- Demo lab summary.
+- Orphan runtime directory reporting.
+- Recent lab lifecycle and recovery events.
+- Confirmation-protected recovery actions.
+
+Recovery actions:
+
+- `Refresh` queues worker-side inspection and does not delete anything.
+- `Mark failed` changes DB state only for stuck transient labs.
+- `Retry destroy` queues the existing safe destroy task.
+- `Force destroy demo` is restricted to demo-prefixed labs and requires `RECOVER_LAB`.
+- `Cleanup demo runtime` is restricted to demo-prefixed destroyed or failed runtime artifacts and requires `CLEANUP_DEMO_RUNTIME`.
+
+Security boundary:
+
+- Backend API still has no Docker socket and does not execute Containerlab.
+- Frontend has no Docker socket.
+- Only `celery_worker` executes Containerlab/Docker operations.
+- Runtime cleanup skips uncertain or non-demo active resources.
 
 ## AI Lab Builder V1
 
@@ -353,6 +382,7 @@ Before broader deployment, replace this with a narrower lab executor boundary.
 - `celery_worker` has privileged host access for Containerlab.
 - AI Lab Builder v1 exists with mock provider and OpenAI-compatible provider abstraction. Real AI provider testing is pending.
 - AI-generated FRR startup configs are previewed, not automatically wired into full lab deployment.
+- Runtime Ops is Phase 11A-level only; orphan detection is conservative and cleanup is demo-restricted.
 - No AI Mentor yet.
 - Production hardening is Phase 10-level only; full HA, SSO, observability, and isolation are not implemented.
 - No automated frontend test suite yet.

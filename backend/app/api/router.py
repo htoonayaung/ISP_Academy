@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1.ai_lab_builder import router as ai_lab_builder_router
 from app.api.v1.admin_demo import router as admin_demo_router
+from app.api.v1.admin_runtime import router as admin_runtime_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.labs import router as labs_router
 from app.api.v1.lab_templates import router as lab_templates_router
@@ -26,3 +27,4 @@ api_router.include_router(verification_router, prefix="/api/v1")
 api_router.include_router(my_verification_router, prefix="/api/v1/my")
 api_router.include_router(ai_lab_builder_router, prefix="/api/v1/ai-lab-builder")
 api_router.include_router(admin_demo_router, prefix="/api/v1/admin/demo")
+api_router.include_router(admin_runtime_router, prefix="/api/v1/admin/runtime")

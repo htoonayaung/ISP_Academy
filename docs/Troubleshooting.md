@@ -156,7 +156,16 @@ docker ps
 containerlab inspect --all
 ```
 
-Destroy the lab from the UI when possible. If manual cleanup is required, verify the lab path stays under `/opt/isp-academy/lab-storage` before deleting anything.
+Destroy the lab from the UI when possible. If it remains stuck, log in as Admin and open `Lab Runtime`.
+
+Recommended order:
+
+1. Click `Refresh`.
+2. Review recent events.
+3. Use `Mark failed` if the lab has been transient too long and you only need to unblock DB state.
+4. Use `Retry destroy` if runtime resources may still exist.
+
+If manual cleanup is required, verify the lab path stays under `/opt/isp-academy/lab-storage` before deleting anything.
 
 ## Lab Stuck DESTROYING
 
@@ -166,7 +175,17 @@ containerlab inspect --all
 docker ps --filter "name=clab"
 ```
 
-Do not hard-delete a running or destroying lab record. Stop/destroy from the UI first and keep cleanup inside `LAB_ROOT`.
+Do not hard-delete a running or destroying lab record. Open `Lab Runtime` as Admin, use `Refresh`, then `Retry destroy`.
+
+Use `Force destroy demo` only for demo-prefixed labs with typed confirmation `RECOVER_LAB`. Keep cleanup inside `LAB_ROOT`.
+
+## Runtime Ops Page Fails
+
+If `Lab Runtime` returns `403`, confirm the logged-in user has `ADMIN` role. Students and instructors cannot access global runtime operations.
+
+If the page returns `409`, the backend is blocking an unsafe recovery action such as forcing a non-demo lab.
+
+If cleanup is uncertain, the backend skips and warns instead of deleting.
 
 ## Verification Stuck RUNNING
 

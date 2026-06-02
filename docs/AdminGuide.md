@@ -110,6 +110,34 @@ Open `Labs` to inspect lab status. Use Lab Detail to view:
 
 Destroy demo labs after use to release server resources.
 
+## Runtime Operations
+
+Open `Lab Runtime` as Admin.
+
+Use this page when labs are stuck, demo runtime files need cleanup, or lab runtime state needs review before a demo.
+
+Runtime states:
+
+- `STARTING` means the worker has queued or is deploying the lab.
+- `STOPPING` means the worker is destroying Containerlab resources but preserving the lab record.
+- `DESTROYING` means the worker is destroying runtime resources and marking the lab destroyed.
+- `FAILED` means the previous lifecycle action failed and needs staff review.
+
+Available actions:
+
+- `Refresh` queues worker-side inspection. It does not delete or destroy anything.
+- `Mark failed` is for stuck `STARTING`, `STOPPING`, or `DESTROYING` labs. It changes DB status only and creates a lifecycle event.
+- `Retry destroy` queues the normal safe destroy task again.
+- `Force destroy demo` is restricted to demo-prefixed labs and requires typed confirmation.
+- `Cleanup demo runtime` removes only demo-prefixed destroyed or failed runtime artifacts when safe. It never targets active non-demo labs.
+
+Typed confirmations:
+
+- Runtime recovery requires `RECOVER_LAB`.
+- Demo runtime cleanup requires `CLEANUP_DEMO_RUNTIME`.
+
+Destroyed lab records may remain in the database for history. Use cleanup only for runtime files, not for learning history.
+
 ## Review Attempts
 
 Open `Attempts` to inspect student attempts:

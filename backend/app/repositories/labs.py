@@ -59,6 +59,15 @@ class LabRepository:
         )
         return list(result.scalars().all())
 
+    async def list_nodes_by_lab_ids(self, lab_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[LabNode]]:
+        if not lab_ids:
+            return {}
+        result = await self.session.execute(select(LabNode).where(LabNode.lab_instance_id.in_(lab_ids)))
+        grouped: dict[uuid.UUID, list[LabNode]] = {}
+        for node in result.scalars().all():
+            grouped.setdefault(node.lab_instance_id, []).append(node)
+        return grouped
+
     async def list_events(self, lab_id: uuid.UUID) -> list[LabEvent]:
         result = await self.session.execute(
             select(LabEvent).where(LabEvent.lab_instance_id == lab_id).order_by(LabEvent.created_at.desc())

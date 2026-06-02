@@ -3,6 +3,7 @@ import { AppLayout } from "../components/layout/AppLayout";
 import { ProtectedRoute } from "../components/layout/ProtectedRoute";
 import { RoleRoute } from "../components/layout/RoleRoute";
 import { DemoSetupPage } from "../features/adminDemo/DemoSetupPage";
+import { RuntimeOpsPage } from "../features/adminRuntime/RuntimeOpsPage";
 import { AiLabBuilderPage } from "../features/aiLabBuilder/AiLabBuilderPage";
 import { AiLabBuilderPreviewDetailPage } from "../features/aiLabBuilder/AiLabBuilderPreviewDetailPage";
 import { AiLabBuilderPreviewsPage } from "../features/aiLabBuilder/AiLabBuilderPreviewsPage";
@@ -34,6 +35,7 @@ export function App() {
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route element={<RoleRoute roles={["ADMIN"]} />}>
             <Route path="/admin/demo-setup" element={<DemoSetupPage />} />
+            <Route path="/admin/runtime" element={<RuntimeOpsPage />} />
             <Route path="/users" element={<UsersPage />} />
           </Route>
           <Route element={<RoleRoute roles={["ADMIN", "INSTRUCTOR"]} />}>

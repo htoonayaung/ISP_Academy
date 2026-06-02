@@ -43,3 +43,4 @@ fi
 
 echo
 echo "No cleanup was performed."
+echo "Use the Admin UI Runtime Ops page or /api/v1/admin/runtime/labs/status for confirmation-protected recovery."
