@@ -18,6 +18,8 @@ Rebuild the frontend:
 docker compose -f deployments/docker-compose.yml up -d --build frontend
 ```
 
+If the frontend container is healthy but the page still fails, check browser devtools for cached assets and confirm `VITE_API_BASE_URL` was correct during the frontend build.
+
 ## Login Problem
 
 Confirm backend readiness:
@@ -84,12 +86,26 @@ curl http://10.0.44.2:8000/ready
 docker compose -f /opt/isp-academy/deployments/docker-compose.yml logs --tail=100 backend
 ```
 
+Run the full health script:
+
+```bash
+cd /opt/isp-academy
+bash scripts/check_system_health.sh
+```
+
 ## Redis Or PostgreSQL Issue
 
 ```bash
 docker compose -f /opt/isp-academy/deployments/docker-compose.yml ps
 docker compose -f /opt/isp-academy/deployments/docker-compose.yml logs --tail=100 postgres
 docker compose -f /opt/isp-academy/deployments/docker-compose.yml logs --tail=100 redis
+```
+
+If PostgreSQL is unhealthy, check disk space before restarting:
+
+```bash
+df -h
+docker system df
 ```
 
 ## Celery Worker Issue
@@ -100,6 +116,12 @@ docker compose -f /opt/isp-academy/deployments/docker-compose.yml restart celery
 ```
 
 The worker is intentionally privileged in the MVP because it executes Containerlab operations. This is technical debt and must be isolated before production.
+
+If the worker is not processing jobs, confirm Redis is healthy and that the worker was rebuilt after code changes:
+
+```bash
+docker compose -f /opt/isp-academy/deployments/docker-compose.yml up -d --build celery_worker
+```
 
 ## Containerlab Deploy Issue
 
@@ -118,6 +140,14 @@ Check lab storage:
 ls -lah /opt/isp-academy/lab-storage
 ```
 
+If `containerlab: command not found`, install Containerlab on the host and confirm `/usr/bin/containerlab` exists because the worker mounts it read-only.
+
+If permission errors mention Docker socket or host networking, confirm only `celery_worker` has `/var/run/docker.sock`, privileged mode, host network, and host PID:
+
+```bash
+bash /opt/isp-academy/scripts/security_smoke_check.sh
+```
+
 ## Lab Stuck STARTING
 
 ```bash
@@ -128,6 +158,16 @@ containerlab inspect --all
 
 Destroy the lab from the UI when possible. If manual cleanup is required, verify the lab path stays under `/opt/isp-academy/lab-storage` before deleting anything.
 
+## Lab Stuck DESTROYING
+
+```bash
+docker compose -f /opt/isp-academy/deployments/docker-compose.yml logs --tail=100 celery_worker
+containerlab inspect --all
+docker ps --filter "name=clab"
+```
+
+Do not hard-delete a running or destroying lab record. Stop/destroy from the UI first and keep cleanup inside `LAB_ROOT`.
+
 ## Verification Stuck RUNNING
 
 Confirm the lab is `RUNNING`, the target node exists, and the worker is running:
@@ -137,6 +177,20 @@ docker compose -f /opt/isp-academy/deployments/docker-compose.yml logs --tail=10
 ```
 
 Review the verification rule command and expected value from the UI.
+
+## Delete Blocked
+
+Guarded delete actions return `409` when references or active state make deletion unsafe.
+
+Common cases:
+
+- User has tickets, templates, labs, attempts, or events.
+- Ticket has student attempts.
+- Template has tickets or lab history.
+- Lab is running or linked to an attempt.
+- Verification rule has run history.
+
+Use deactivate/archive, or delete dependent demo data in the correct order.
 
 ## Docker Cleanup Commands
 
@@ -150,6 +204,16 @@ docker container prune
 ```
 
 Do not prune volumes unless you have a fresh PostgreSQL and lab storage backup.
+
+If Docker disk is full:
+
+```bash
+docker system df
+du -sh /opt/isp-academy/backups
+du -sh /opt/isp-academy/lab-storage
+```
+
+Prefer UI lab destroy and verified backups before pruning.
 
 ## Useful Logs
 
@@ -219,6 +283,21 @@ Users should type plain English, not JSON. Good examples:
 If the preview says the request could not be safely interpreted, use one of the example prompts or add the protocol, node count, and verification goal.
 
 If validation mentions unsupported images, privileged containers, host mounts, external networks, or vendor devices, the request is intentionally blocked by security validation.
+
+## Real Provider Rate Limit Or Invalid Response
+
+OpenRouter/Groq/Gemini free models can return rate limits or incomplete responses. Use mock mode for demos, retry later, or choose a different model. The backend should store an invalid preview with a friendly error rather than exposing provider internals.
+
+## GitHub Push Auth Issue
+
+If HTTPS push fails with username/token prompts, prefer SSH remote:
+
+```bash
+git remote set-url origin git@github.com:htoonayaung/ISP_Academy.git
+git push
+```
+
+Never paste GitHub tokens into chat, docs, screenshots, or shell history.
 
 # Demo Setup Troubleshooting
 

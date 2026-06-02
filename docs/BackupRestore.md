@@ -26,6 +26,13 @@ The script writes a timestamped custom-format dump to:
 /opt/isp-academy/backups/
 ```
 
+Verify the backup file:
+
+```bash
+latest="$(ls -t backups/*.dump | head -n 1)"
+bash scripts/verify_backup_file.sh "$latest"
+```
+
 Manual equivalent:
 
 ```bash
@@ -58,6 +65,19 @@ Recommended safe storage:
 
 Do not store release backups only in the Git repository working tree.
 
+## Post-Release Backup
+
+After a release, tag, or major demo:
+
+```bash
+cd /opt/isp-academy
+bash scripts/backup_database.sh
+latest="$(ls -t backups/*.dump | head -n 1)"
+bash scripts/verify_backup_file.sh "$latest"
+```
+
+Copy the verified backup off the server.
+
 ## PostgreSQL Restore
 
 Use the helper script with a backup path:
@@ -68,6 +88,8 @@ bash scripts/restore_database.sh backups/isp_academy_YYYYmmdd_HHMMSS.dump
 ```
 
 Restore replaces database objects in the target database. Confirm you are restoring to the intended environment.
+
+Always test restore on staging first when possible.
 
 Restore dry-run warning:
 
@@ -93,6 +115,31 @@ sudo tar -czf /opt/isp-academy/backups/lab-storage_$(date +%Y%m%d_%H%M%S).tar.gz
 ```
 
 Only restore lab storage when no labs are running.
+
+## What The DB Backup Includes
+
+The PostgreSQL backup includes application database records:
+
+- Users and roles.
+- Lab templates.
+- Lab instances, nodes, and events.
+- Tickets and attempts.
+- Verification rules, runs, and results.
+- AI Lab Builder previews.
+
+## What The DB Backup Does Not Include
+
+It does not include:
+
+- `deployments/env/backend.env`.
+- AI provider keys.
+- JWT secret.
+- Demo password values stored only in environment.
+- Lab runtime files under `lab-storage`.
+- Docker images or container runtime state.
+- GitHub tokens or SSH keys.
+
+Back up `backend.env` and `lab-storage` separately when needed. Store environment secrets outside Git.
 
 ## Git Tag Recommendation
 

@@ -179,3 +179,22 @@ Rules:
 - Use environment variables and `.env.example` without real secret values.
 - Do not commit real provider API keys.
 - Do not log tokens, password hashes, or AI provider credentials.
+- Do not paste secrets into chat, documentation, screenshots, shell history, or issue trackers.
+- `deployments/env/backend.env` must stay ignored by Git.
+- Backup dumps and SQL files must stay ignored by Git.
+- Rotate admin passwords, demo passwords, JWT secrets, AI API keys, and GitHub tokens using the password rotation guide.
+- AI API keys must remain backend-only and must never be returned by frontend or provider status APIs.
+
+## Docker Compose Boundary
+
+Rules:
+
+- Backend must not mount `/var/run/docker.sock`.
+- Backend must not run privileged.
+- Backend must not use host network or host PID.
+- Frontend must not mount `/var/run/docker.sock`.
+- Frontend must not run privileged.
+- Frontend must not use host network or host PID.
+- Only `celery_worker` may have Docker/Containerlab host access in the MVP.
+- `celery_worker` privileged access is MVP-only technical debt.
+- PostgreSQL and Redis should bind to loopback unless an explicit internal network change is approved.

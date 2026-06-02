@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-The current MVP is demo-ready. Phase 9C adds safer management actions for users, templates, tickets, verification rules, labs, attempts, and AI previews before Phase 10 production hardening.
+The current MVP is demo-ready and Phase 10 production hardening documentation/scripts are in place for safer internal use and controlled external demos.
 
 ## Current MVP Status
 
@@ -20,6 +20,7 @@ Completed:
 - Admin-only Demo Setup Wizard for repeatable MVP demos.
 - Phase 9B polished browser demo flow for the student ticket, lab, verification, and destroy journey.
 - Phase 9C management CRUD and operational cleanup.
+- Phase 10 production hardening scripts and operations documentation.
 - Demo rehearsal and release freeze documentation for `v0.3.0-demo-ready`.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
@@ -28,7 +29,6 @@ Not included yet:
 - AI Mentor.
 - Web terminal.
 - Certification, leaderboard, analytics.
-- Production hardening.
 - Advanced topology editor.
 
 ## URLs
@@ -134,6 +134,34 @@ curl http://10.0.44.2:8000/health
 curl http://10.0.44.2:8000/ready
 curl http://10.0.44.2:8000/api/v1/system/info
 ```
+
+## Phase 10 Production Hardening
+
+Phase 10 adds operational checks, security smoke checks, backup verification, reverse proxy preparation, and password rotation guidance without adding new product features.
+
+Run:
+
+```bash
+cd /opt/isp-academy
+bash scripts/check_system_health.sh
+bash scripts/security_smoke_check.sh
+bash scripts/check_lab_runtime_state.sh
+```
+
+Backup verification:
+
+```bash
+bash scripts/backup_database.sh
+latest="$(ls -t backups/*.dump | head -n 1)"
+bash scripts/verify_backup_file.sh "$latest"
+```
+
+Phase 10 docs:
+
+- [Operations Checklist](docs/OperationsChecklist.md)
+- [Reverse Proxy Guide](docs/ReverseProxyGuide.md)
+- [Password Rotation Guide](docs/PasswordRotationGuide.md)
+- [Backup And Restore](docs/BackupRestore.md)
 
 ## AI Lab Builder V1
 
@@ -321,14 +349,27 @@ Before broader deployment, replace this with a narrower lab executor boundary.
 ## Known Technical Debt
 
 - JWT is stored in browser `localStorage`.
-- HTTP is used unless HTTPS is configured externally.
+- HTTP-only unless the reverse proxy guide is implemented.
 - `celery_worker` has privileged host access for Containerlab.
 - AI Lab Builder v1 exists with mock provider and OpenAI-compatible provider abstraction. Real AI provider testing is pending.
 - AI-generated FRR startup configs are previewed, not automatically wired into full lab deployment.
 - No AI Mentor yet.
-- No production hardening yet.
+- Production hardening is Phase 10-level only; full HA, SSO, observability, and isolation are not implemented.
 - No automated frontend test suite yet.
+- No high availability.
+- No multi-tenant production isolation.
+- No topology diagram yet.
 - No web terminal yet.
+
+## Future UX Direction
+
+A NetPilot-inspired three-panel layout is a future design direction only:
+
+- Left panel: navigation and labs list.
+- Center panel: AI prompt/workspace.
+- Right panel: lab context, topology, infra status, and node details.
+
+This is not implemented in Phase 10 and is not intended as an exact copy.
 
 ## Documentation
 
@@ -338,6 +379,9 @@ Before broader deployment, replace this with a narrower lab executor boundary.
 - [Student Guide](docs/StudentGuide.md)
 - [Troubleshooting](docs/Troubleshooting.md)
 - [Backup And Restore](docs/BackupRestore.md)
+- [Operations Checklist](docs/OperationsChecklist.md)
+- [Reverse Proxy Guide](docs/ReverseProxyGuide.md)
+- [Password Rotation Guide](docs/PasswordRotationGuide.md)
 - [AI Lab Builder Guide](docs/AiLabBuilderGuide.md)
 - [Architecture](docs/Architecture.md)
 - [Security Rules](docs/SecurityRules.md)

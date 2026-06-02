@@ -1,5 +1,6 @@
 services:
   backend:
+    # API container intentionally has no Docker socket, privileged mode, host network, or host PID.
     build:
       context: ../backend
     env_file:
@@ -14,9 +15,16 @@ services:
     volumes:
       - /opt/isp-academy/lab-storage:/opt/isp-academy/lab-storage
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
 
   frontend:
+    # Frontend container intentionally has no Docker socket, privileged mode, host network, or host PID.
     build:
       context: ../frontend
       args:
@@ -25,9 +33,17 @@ services:
       - backend
     ports:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
 
   celery_worker:
+    # MVP-only technical debt: Containerlab requires host Docker/network access here.
+    # Do not grant these privileges to backend or frontend.
     build:
       context: ../backend
     user: "0:0"
@@ -61,6 +77,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
+      # Bound to loopback only; not exposed publicly.
       - "127.0.0.1:5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
@@ -75,6 +92,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
+      # Bound to loopback only; not exposed publicly.
       - "127.0.0.1:6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
