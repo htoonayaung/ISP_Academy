@@ -1,6 +1,6 @@
 # AI-Powered ISP Academy MVP
 
-Phase 8 adds AI Lab Builder v1 on top of the current MVP: backend, lab engine, verification engine, minimal frontend, documentation, backup guidance, and admin/instructor-only AI preview approval.
+Phase 9B polishes the browser demo journey on top of the current MVP: backend, lab engine, verification engine, minimal frontend, AI Lab Builder v1, demo setup, documentation, and guided student workflow screens.
 
 ## Current MVP Status
 
@@ -18,6 +18,7 @@ Completed:
 - Role-aware navigation and demo-ready browser workflow.
 - AI Lab Builder v1 preview, validation, and approval into inactive lab templates.
 - Admin-only Demo Setup Wizard for repeatable MVP demos.
+- Phase 9B polished browser demo flow for the student ticket, lab, verification, and destroy journey.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
 Not included yet:
@@ -187,6 +188,29 @@ POST /api/v1/admin/demo/reset
 ```
 
 Reset requires `RESET_DEMO_DATA` confirmation and targets demo-prefixed data only.
+
+## Phase 9B Browser Demo Flow
+
+Use this flow for live demos without Swagger or curl:
+
+1. Admin logs in and opens `Demo Setup`.
+2. Confirm the page shows `DEMO READY`.
+3. Copy the student username and go to login.
+4. Log in as `demo_student`.
+5. Dashboard shows the recommended `Start Demo Ticket` card.
+6. Open the demo ticket and start an attempt.
+7. Attempt detail shows a five-step guide.
+8. Open the linked lab, start it, and wait for `RUNNING`.
+9. Return to the attempt and run verification.
+10. Confirm the verification result shows `PASSED`.
+11. Open the lab and destroy it.
+
+Expected browser behavior:
+
+- Student menu shows only Dashboard, Tickets, My Attempts, and My Labs.
+- Student never sees Demo Setup, AI Lab Builder, or hidden solution text.
+- Lab lifecycle buttons are disabled during STARTING, STOPPING, and DESTROYING.
+- Verification is disabled until the linked lab is RUNNING.
 
 ## Backup
 

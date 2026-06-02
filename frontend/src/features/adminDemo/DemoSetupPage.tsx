@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Alert } from "../../components/ui/Alert";
 import { Badge } from "../../components/ui/Badge";
 import { Button } from "../../components/ui/Button";
@@ -91,6 +92,30 @@ export function DemoSetupPage() {
     <div className="space-y-4">
       <PageHeader title="Demo Setup" subtitle="Create and reset safe demo-prefixed data for MVP walkthroughs." />
       {error && <Alert message={error} />}
+      {status?.demo_ready && (
+        <Card title="Demo Ready" subtitle="The demo users, lab template, ticket, and verification rule are ready for a browser walkthrough.">
+          <div className="space-y-4">
+            <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+              Demo data is ready. Next step: logout from the admin account and login as <strong>demo_student</strong>.
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-md bg-slate-50 p-3 text-sm">
+                <div className="text-xs font-medium uppercase text-slate-500">Instructor username</div>
+                <div className="mt-1 font-semibold">demo_instructor</div>
+              </div>
+              <div className="rounded-md bg-slate-50 p-3 text-sm">
+                <div className="text-xs font-medium uppercase text-slate-500">Student username</div>
+                <div className="mt-1 font-semibold">demo_student</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => copy("demo_student")}>Copy student username</Button>
+              <Link className="inline-flex min-h-9 items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700" to="/login">Go to login</Link>
+              <a className="inline-flex min-h-9 items-center rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" href="https://github.com/htoonayaung/ISP_Academy/blob/phase-7-frontend/docs/DemoGuide.md" target="_blank" rel="noreferrer">Open Demo Guide</a>
+            </div>
+          </div>
+        </Card>
+      )}
       <Card title="Demo Status" subtitle="Setup never starts labs, runs AI, or deploys Containerlab.">
         {status ? (
           <div className="space-y-3">
@@ -121,14 +146,21 @@ export function DemoSetupPage() {
           </Card>
         </div>
       )}
-      <Card title="Actions" subtitle="Reset requires exact confirmation and affects demo-prefixed data only.">
+      <Card title="Setup Action" subtitle={status?.demo_ready ? "Demo data already exists. Re-run only if an item is missing." : "Run setup to create demo-prefixed users and content."}>
         <div className="flex flex-wrap items-end gap-3">
-          <Button disabled={isBusy || status?.safe_to_run_setup === false} onClick={runSetup}>Run Demo Setup</Button>
+          <Button className={status?.demo_ready ? "bg-slate-600 hover:bg-slate-700" : ""} disabled={isBusy || status?.safe_to_run_setup === false || status?.demo_ready === true} onClick={runSetup}>Run Demo Setup</Button>
+          {status?.demo_ready && <span className="text-sm text-slate-600">Setup is disabled because the demo is already ready.</span>}
+        </div>
+      </Card>
+      <Card title="Danger Zone" subtitle="Reset requires exact confirmation and affects demo-prefixed data only.">
+        <div className="rounded-md border border-rose-200 bg-rose-50 p-3">
+          <div className="flex flex-wrap items-end gap-3">
           <div className="w-64">
-            <label className="mb-1 block text-xs font-medium text-slate-600">Type RESET_DEMO_DATA</label>
+            <label className="mb-1 block text-xs font-medium text-rose-900">Type RESET_DEMO_DATA</label>
             <Input value={resetConfirm} onChange={(event) => setResetConfirm(event.target.value)} />
           </div>
           <Button className="bg-rose-700 hover:bg-rose-800" disabled={isBusy || resetConfirm !== "RESET_DEMO_DATA"} onClick={resetDemo}>Reset Demo Data</Button>
+          </div>
         </div>
       </Card>
       {setupResult && (

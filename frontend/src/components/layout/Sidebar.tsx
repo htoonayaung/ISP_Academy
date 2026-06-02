@@ -11,14 +11,14 @@ export function Sidebar() {
   const items = role === "ADMIN"
     ? [
         { to: "/dashboard", label: "Dashboard", icon: Home },
-        { to: "/admin/demo-setup", label: "Demo Setup", icon: WandSparkles },
-        { to: "/ai-lab-builder", label: "AI Lab Builder", icon: Sparkles },
         { to: "/users", label: "Users", icon: Users },
+        { to: "/admin/demo-setup", label: "Demo Setup", icon: WandSparkles },
         { to: "/lab-templates", label: "Lab Templates", icon: Network },
         { to: "/labs", label: "Labs", icon: FlaskConical },
         { to: "/tickets", label: "Tickets", icon: Ticket },
         { to: "/verification-rules", label: "Verification Rules", icon: ShieldCheck },
-        { to: "/attempts", label: "Attempts", icon: ListChecks }
+        { to: "/attempts", label: "Attempts", icon: ListChecks },
+        { to: "/ai-lab-builder", label: "AI Lab Builder", icon: Sparkles }
       ]
     : role === "INSTRUCTOR"
       ? [

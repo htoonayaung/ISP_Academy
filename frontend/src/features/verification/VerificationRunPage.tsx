@@ -34,6 +34,10 @@ export function VerificationRunPage() {
   <PageHeader title={`Verification ${run.id.slice(0, 8)}`} subtitle="Review per-rule verification results for this attempt." action={<CopyId id={run.id} label="Run ID" />} />
   <Card title="Verification Results" subtitle="PASSED, FAILED, or ERROR is shown for each rule." action={<Badge value={run.status} />}>
     {error && <div className="mb-3"><Alert message={error} /></div>}
+    {["QUEUED", "RUNNING"].includes(run.status) && <div className="mb-3 rounded-md bg-sky-50 px-3 py-2 text-sm text-sky-800">Verification is queued or running. Results will refresh automatically.</div>}
+    {run.status === "PASSED" && <div className="mb-3 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Great! Your lab passed verification.</div>}
+    {run.status === "FAILED" && <div className="mb-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">Some checks failed. Review the result and try again.</div>}
+    {run.status === "ERROR" && <div className="mb-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">Verification hit an error. Review the message below or ask an instructor.</div>}
     <Table><thead><tr><Th>Rule</Th><Th>Status</Th><Th>Message</Th><Th>Created</Th></tr></thead><tbody>{run.results.map((result) => <tr key={result.id}><Td>{result.verification_rule_id.slice(0, 8)}</Td><Td><Badge value={result.status} /></Td><Td>{result.message}</Td><Td>{formatDate(result.created_at)}</Td></tr>)}</tbody></Table>
     {run.results.length === 0 && <EmptyState title="No rule results yet" description="Queued or running verification tasks will populate this table shortly." />}
   </Card>
