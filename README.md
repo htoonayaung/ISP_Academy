@@ -16,7 +16,7 @@ Completed:
 - Basic verification rules and verification runs.
 - Minimal React, TypeScript, TailwindCSS frontend.
 - Role-aware navigation and demo-ready browser workflow.
-- AI Lab Builder v1 preview, validation, and approval into inactive lab templates.
+- AI Lab Builder v1 preview, validation, natural-language prompt robustness, and approval into inactive lab templates.
 - Admin-only Demo Setup Wizard for repeatable MVP demos.
 - Phase 9B polished browser demo flow for the student ticket, lab, verification, and destroy journey.
 - Phase 9C management CRUD and operational cleanup.
@@ -100,7 +100,7 @@ docker compose -f deployments/docker-compose.yml exec backend python -m app.scri
 ## AI Lab Builder Demo Flow
 
 1. Admin or instructor opens AI Lab Builder.
-2. Admin or instructor enters a prompt and generates a preview.
+2. Admin or instructor describes the lab in plain English and generates a preview.
 3. Admin or instructor reviews validation status, generated Containerlab YAML, generated configs, and verification rule previews.
 4. Admin or instructor approves the preview.
 5. Approval creates an inactive `LabTemplate`.
@@ -137,7 +137,16 @@ curl http://10.0.44.2:8000/api/v1/system/info
 
 ## AI Lab Builder V1
 
-AI Lab Builder v1 is included in Phase 8. The current MVP demo server uses the `mock` provider:
+AI Lab Builder v1 is included in Phase 8. Phase 8.6 lets users type plain-language requests instead of JSON. The backend internally interprets common requests into a complete LabPlan, validates it, and only then creates a preview.
+
+Supported simple prompts:
+
+- Two-router FRR OSPF area 0 lab.
+- Two-router FRR eBGP lab.
+- Basic Linux uname verification lab.
+- Simple static routing lab.
+
+The current MVP demo server can use the `mock` provider:
 
 ```env
 AI_LAB_BUILDER_ENABLED=true
@@ -170,6 +179,8 @@ Phase 8 behavior:
 
 - AI output is stored only as a preview first.
 - AI output is untrusted.
+- Users should describe labs in plain language, not write JSON.
+- The backend uses deterministic safe scaffolds for common OSPF, BGP, Linux, and static routing prompts when provider output is incomplete.
 - Backend validation is mandatory.
 - Approval creates an inactive `LabTemplate`.
 - There is no auto-deploy.

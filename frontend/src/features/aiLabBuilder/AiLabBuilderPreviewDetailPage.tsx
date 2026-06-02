@@ -83,6 +83,8 @@ export function AiLabBuilderPreviewDetailPage() {
   const planDescription = preview.lab_plan_json.description || "Review generated output and validation errors.";
   const nodes = preview.lab_plan_json.nodes || [];
   const links = preview.lab_plan_json.links || [];
+  const isInvalid = preview.status === "INVALID" || preview.validation_status === "FAILED";
+  const friendlyInvalidMessage = preview.validation_errors.find((item) => item.includes("could not be safely interpreted")) || "This preview is invalid. Try a simpler prompt or use one of the example prompts.";
 
   return (
     <div className="space-y-4">
@@ -111,7 +113,9 @@ export function AiLabBuilderPreviewDetailPage() {
         )}
       </Card>
       <Card title="Validation Errors" subtitle="AI output is blocked until these are fixed by a new prompt.">
-        {preview.validation_errors.length > 0 ? <ul className="list-disc space-y-1 pl-5 text-sm text-rose-700">{preview.validation_errors.map((item) => <li key={item}>{item}</li>)}</ul> : <p className="text-sm text-slate-600">No validation errors.</p>}
+        {isInvalid && <div className="mb-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">{friendlyInvalidMessage}</div>}
+        {preview.validation_errors.length > 0 ? <details open className="text-sm"><summary className="cursor-pointer font-medium text-slate-700">Technical validation details</summary><ul className="mt-2 list-disc space-y-1 pl-5 text-rose-700">{preview.validation_errors.map((item) => <li key={item}>{item}</li>)}</ul></details> : <p className="text-sm text-slate-600">No validation errors.</p>}
+        {isInvalid && <Link className="mt-3 inline-flex min-h-9 items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700" to="/ai-lab-builder">Back to builder</Link>}
       </Card>
       <Card title="Generated Topology" subtitle="Containerlab YAML preview. No deployment occurs in Phase 8.">
         <pre className="max-h-96 overflow-auto rounded-md bg-slate-950 p-3 text-xs text-slate-50">{preview.generated_containerlab_yaml}</pre>

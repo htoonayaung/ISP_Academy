@@ -11,10 +11,13 @@ import { api } from "../../lib/api";
 import { AILabBuilderPreview, AIProviderStatus } from "../../types/aiLabBuilder";
 
 const promptExamples = [
-  "Create a basic Linux lab with one Alpine host named host1. Add a uname verification rule.",
+  "Create a two-router FRR OSPF lab with one area 0 link and an OSPF neighbor verification rule.",
   "Create a two-router FRR eBGP lab with one point-to-point link and a BGP neighbor verification rule.",
-  "Create a two-router FRR OSPF lab with one area 0 link and an OSPF neighbor verification rule."
+  "Create a basic Linux lab with one Alpine host named host1 and a uname verification rule.",
+  "Create a two-router FRR static routing lab with one point-to-point link and a route verification rule."
 ];
+
+const exampleLabels = ["Two-router FRR OSPF", "Two-router FRR eBGP", "Basic Linux uname verification", "Static routing lab"];
 
 export function AiLabBuilderPage() {
   const [prompt, setPrompt] = useState(promptExamples[0]);
@@ -69,7 +72,7 @@ export function AiLabBuilderPage() {
     <div className="space-y-4">
       <PageHeader
         title="AI Lab Builder"
-        subtitle="Generate a safe preview, validate it, then approve it into an inactive lab template."
+        subtitle="Describe the lab in plain English. The backend turns it into a safe LabPlan preview."
         action={<Link className="rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700" to="/ai-lab-builder/previews">Previews</Link>}
       />
       <Card title="Provider Status" subtitle="API keys stay on the backend and are never shown in the browser.">
@@ -92,22 +95,29 @@ export function AiLabBuilderPage() {
           <div className="mt-3 rounded-md bg-slate-100 px-3 py-2 text-sm text-slate-700">AI Lab Builder is disabled on this server.</div>
         )}
       </Card>
-      <Card title="Generate Preview" subtitle="Phase 8 never starts Containerlab and never creates a running lab. AI output is treated as untrusted.">
+      <Card title="Generate Preview" subtitle="You can describe the lab in plain English. The system will generate the structured LabPlan internally.">
         {error && <Alert message={error} />}
         {providerStatus && !providerStatus.enabled ? (
           <p className="text-sm text-slate-600">AI Lab Builder is disabled on this server.</p>
         ) : <form className="space-y-3" onSubmit={submit}>
-          <label className="block text-sm font-medium text-slate-700" htmlFor="ai-prompt">Prompt</label>
-          <Textarea id="ai-prompt" className="min-h-40" value={prompt} onChange={(event) => setPrompt(event.target.value)} />
+          <label className="block text-sm font-medium text-slate-700" htmlFor="ai-prompt">Lab description</label>
+          <Textarea
+            id="ai-prompt"
+            className="min-h-40"
+            placeholder="Describe the lab you want, e.g. Create a two-router FRR OSPF lab with one area 0 link and an OSPF neighbor verification rule."
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+          />
+          <p className="text-sm text-slate-600">Do not write JSON. Keep the request simple: lab type, node count, protocol, and verification goal.</p>
           <div className="flex flex-wrap gap-2">
-            {promptExamples.map((example) => (
+            {promptExamples.map((example, index) => (
               <button
                 className="rounded-md border border-slate-300 px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                 key={example}
                 type="button"
                 onClick={() => setPrompt(example)}
               >
-                {example}
+                {exampleLabels[index]}
               </button>
             ))}
           </div>

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-AI Lab Builder v1 helps Admin and Instructor users generate a safe lab preview from a natural language prompt.
+AI Lab Builder v1 helps Admin and Instructor users generate a safe lab preview from a natural language prompt. Users should describe the lab in plain English; they do not need to write JSON.
 
 It is a preview and approval workflow only. It does not deploy Containerlab, create a `LabInstance`, start a lab, or run verification.
 
@@ -20,7 +20,7 @@ Blocked:
 ## Workflow
 
 1. Open `AI Lab Builder`.
-2. Enter a prompt describing the lab goal, nodes, protocols, and verification intent.
+2. Enter a plain-language prompt describing the lab goal, nodes, protocols, and verification intent.
 3. Generate a preview.
 4. Review validation status, generated Containerlab YAML, generated configs, and verification rule previews.
 5. Approve the preview if validation passes.
@@ -38,10 +38,24 @@ Blocked:
 - Allowed images are limited to Linux and FRRouting images already accepted by template validation.
 - Unsupported vendor images and `vrnetlab` images are rejected in Phase 8.
 
+## Natural Language Prompts
+
+Phase 8.6 adds a backend interpreter for common simple requests. If the AI provider returns incomplete JSON but the prompt is clearly understood, the backend uses a deterministic safe scaffold and still runs full validation.
+
+Supported simple prompts:
+
+- `Create a two-router FRR OSPF lab with one area 0 link and an OSPF neighbor verification rule.`
+- `Create a two-router FRR eBGP lab with one point-to-point link and a BGP neighbor verification rule.`
+- `Create a basic Linux lab with one Alpine host named host1 and a uname verification rule.`
+- `Create a two-router FRR static routing lab with one point-to-point link and a route verification rule.`
+
+Unsupported complex labs may require more detail. Unsafe requests remain invalid.
+
 ## Security Rules
 
 - AI output is untrusted.
 - Backend validates every generated LabPlan.
+- Deterministic prompt scaffolds do not bypass validation.
 - Approval re-runs validation.
 - Approval creates an inactive lab template only.
 - Approval does not create or start a lab.
@@ -135,6 +149,6 @@ If preview generation returns `503`, AI Lab Builder is disabled or provider conf
 
 If preview generation returns `400` with real provider confirmation text, check the UI confirmation box before submitting.
 
-If validation fails, adjust the prompt and generate a new preview. Do not manually edit preview JSON in the database.
+If validation fails, the preview shows a friendly explanation first and technical validation details below it. Adjust the prompt and generate a new preview. Do not manually edit preview JSON in the database.
 
 If a student can see AI Builder navigation, treat it as a security bug and fix role-based routing/menu visibility before continuing demos.

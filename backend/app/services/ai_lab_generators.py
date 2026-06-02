@@ -50,6 +50,9 @@ class FRRConfigGenerator:
                     if peer_ip:
                         lines.append(f" neighbor {peer_ip} remote-as {session.peer_as}")
                 lines.append("exit")
+            static_routes = [route for route in plan.protocols.static_routes if route.node == node_name]
+            for route in static_routes:
+                lines.append(f"ip route {route.prefix} {route.next_hop}")
             configs.append({"node": node_name, "config_type": "frr", "content": "\n".join(lines) + "\n"})
         configs.extend(config.model_dump() for config in plan.startup_configs if config.node not in frr_nodes)
         return configs

@@ -207,6 +207,19 @@ The response never includes `AI_API_KEY`. It returns only `has_api_key` and a ho
 
 For real providers, `AI_DAILY_PREVIEW_LIMIT_PER_USER` limits preview creation per user per day. Mock mode is intended for demos and avoids accidental quota usage.
 
+## Natural Language Prompt Returns INVALID
+
+Users should type plain English, not JSON. Good examples:
+
+- `Create a two-router FRR OSPF lab with one area 0 link and an OSPF neighbor verification rule.`
+- `Create a two-router FRR eBGP lab with one point-to-point link and a BGP neighbor verification rule.`
+- `Create a basic Linux lab with one Alpine host named host1 and a uname verification rule.`
+- `Create a two-router FRR static routing lab with one point-to-point link and a route verification rule.`
+
+If the preview says the request could not be safely interpreted, use one of the example prompts or add the protocol, node count, and verification goal.
+
+If validation mentions unsupported images, privileged containers, host mounts, external networks, or vendor devices, the request is intentionally blocked by security validation.
+
 # Demo Setup Troubleshooting
 
 ## Demo Setup Disabled

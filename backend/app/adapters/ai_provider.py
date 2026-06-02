@@ -32,9 +32,11 @@ PROVIDER_PRESETS = {
     },
 }
 
-AI_LAB_BUILDER_SYSTEM_PROMPT = """You generate safe ISP Academy training labs.
+AI_LAB_BUILDER_SYSTEM_PROMPT = """You generate safe ISP Academy training labs from plain-language user requests.
+Users do not write JSON. Infer a complete safe LabPlan from normal English.
 Return JSON only. Do not use markdown fences. Do not include explanations outside JSON.
 The JSON keys must match the LabPlan schema exactly.
+Always include all required fields. If the user prompt is short, infer safe defaults.
 Supported categories: Linux, BGP, OSPF.
 Supported difficulty values: Easy, Medium, Hard.
 Supported node kinds: linux, frr.
@@ -46,6 +48,11 @@ Verification parser_type must be SIMPLE_TEXT.
 Allowed assertion_type values: CONTAINS, NOT_CONTAINS, EQUALS, EXIT_CODE_ZERO, BGP_NEIGHBOR_ESTABLISHED, ROUTE_EXISTS.
 Use only these verification commands when possible: uname, show bgp summary, show ip bgp summary, show ip ospf neighbor, show ip route, ip route.
 Include beginner-friendly student_instructions and hints.
+Include safety_notes as a list of strings.
+For OSPF prompts, default to two FRR routers r1 and r2 in area 0 with subnet 10.0.12.0/30.
+For BGP prompts, default to two FRR routers r1 and r2 with AS 65001 and 65002.
+For Linux prompts, default to one Alpine host named host1 with uname verification.
+For static routing prompts, default to two FRR routers and private static routes.
 If the request is unsupported, return a valid minimal supported LabPlan JSON and explain the limitation in safety_notes."""
 
 

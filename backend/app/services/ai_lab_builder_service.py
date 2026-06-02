@@ -22,6 +22,7 @@ from app.services.ai_lab_generators import (
     VerificationRulePreviewGenerator,
 )
 from app.services.ai_lab_plan_validator import LabPlanValidator
+from app.services.ai_prompt_interpreter import NaturalLanguagePromptInterpreter
 
 
 class AILabBuilderService:
@@ -37,6 +38,7 @@ class AILabBuilderService:
         config_generator: FRRConfigGenerator | None = None,
         rule_generator: VerificationRulePreviewGenerator | None = None,
         explanation_generator: LabPreviewExplanationGenerator | None = None,
+        prompt_interpreter: NaturalLanguagePromptInterpreter | None = None,
     ) -> None:
         self.repository = repository
         self.template_repository = template_repository
@@ -48,6 +50,7 @@ class AILabBuilderService:
         self.config_generator = config_generator or FRRConfigGenerator()
         self.rule_generator = rule_generator or VerificationRulePreviewGenerator()
         self.explanation_generator = explanation_generator or LabPreviewExplanationGenerator()
+        self.prompt_interpreter = prompt_interpreter or NaturalLanguagePromptInterpreter()
 
     async def create_preview(
         self,
@@ -64,11 +67,14 @@ class AILabBuilderService:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
         except AIProviderResponseError as exc:
             return await self._store_invalid_preview(actor, prompt, [str(exc)])
+        raw_plan, interpretation_errors = self.prompt_interpreter.normalize(prompt, raw_plan)
         validation = self.validator.validate_raw(raw_plan)
         generated_yaml = ""
         configs: list[dict[str, Any]] = []
         rules: list[dict[str, Any]] = []
-        errors = list(validation.errors)
+        errors = list(interpretation_errors) + list(validation.errors)
+        if validation.lab_plan is None and not interpretation_errors:
+            errors.insert(0, self.prompt_interpreter.interpret(prompt, raw_plan).errors[0])
 
         if validation.lab_plan is not None:
             generated_yaml = self.yaml_generator.generate(validation.lab_plan)
