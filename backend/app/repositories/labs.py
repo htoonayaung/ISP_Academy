@@ -59,6 +59,13 @@ class LabRepository:
         )
         return list(result.scalars().all())
 
+    async def get_node_by_id(self, node_id: str | uuid.UUID) -> LabNode | None:
+        try:
+            parsed_id = uuid.UUID(str(node_id))
+        except ValueError:
+            return None
+        return await self.session.get(LabNode, parsed_id)
+
     async def list_nodes_by_lab_ids(self, lab_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[LabNode]]:
         if not lab_ids:
             return {}

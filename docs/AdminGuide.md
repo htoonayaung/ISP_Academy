@@ -148,7 +148,22 @@ Admins can view read-only topology diagrams on:
 
 Click a node to inspect kind, role, image, status, management IP, and interfaces. Runtime status appears on Lab detail when worker inspection has reported nodes.
 
-Console access is intentionally disabled and will be added only in a future phase. Do not expect topology drag/drop or editing in this MVP phase.
+Topology drag/drop and editing are not available in this MVP phase. Router console access is limited to supported running lab nodes.
+
+## Router Console
+
+Admins can open a running lab, click a console-capable topology node, and use `Open Console`.
+
+Console commands are scoped to lab-owned nodes only. The API does not expose Docker or Containerlab access; execution is worker-mediated.
+
+Use this for safe FRR `vtysh` checks such as:
+
+- `show ip route`
+- `show ip ospf neighbor`
+- `show bgp summary`
+- `show running-config`
+
+There is no full interactive terminal or SSH login in this phase.
 
 ## Review Attempts
 

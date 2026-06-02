@@ -167,6 +167,22 @@ Rules:
 - Container names are hidden from students.
 - Topology diagrams are read-only; no drag/drop editor, console, web terminal, SSH runner, or config apply exists in this phase.
 
+## Router Console Safety
+
+Rules:
+
+- Console APIs are lab-node scoped.
+- The target node must belong to the requested `LabInstance`.
+- The lab must be `RUNNING`.
+- Students can access only their own lab nodes.
+- Users never pass container names directly.
+- Container names come from DB `LabNode` records only.
+- API and frontend must not mount Docker socket.
+- Only `celery_worker` executes `docker exec`.
+- `subprocess.run` must use argument lists and no `shell=True`.
+- Command policy blocks shell escapes, pipes, redirects, host paths, package managers, Docker, Containerlab, and host shell commands.
+- No SSH login, PTY, full web terminal, host shell, or backend shell exposure exists in this phase.
+
 ## Hidden Solution Protection
 
 Rules:

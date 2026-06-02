@@ -17,5 +17,5 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
     broker_connection_retry_on_startup=True,
-    imports=("app.workers.lab_tasks", "app.workers.verification_tasks"),
+    imports=("app.workers.lab_tasks", "app.workers.verification_tasks", "app.workers.console_tasks"),
 )

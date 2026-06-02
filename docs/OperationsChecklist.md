@@ -83,6 +83,20 @@ Database backups do not include `backend.env`, AI keys, JWT secret, Docker image
 
 Open AI Lab Builder as Admin and review Provider Status. It must never display the API key value.
 
+## Router Console Check
+
+For a running FRR lab, open Lab Detail, click a router node, and run:
+
+```text
+show ip route
+```
+
+Confirm unsafe commands are blocked and that backend/frontend still have no Docker socket by running:
+
+```bash
+bash scripts/security_smoke_check.sh
+```
+
 ## Git Safety Before Commit
 
 ```bash

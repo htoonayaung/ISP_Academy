@@ -65,7 +65,15 @@ Open `Attempts` to review attempts for tickets you created. The view is read-onl
 
 Instructors can view read-only topology diagrams for templates and labs they are allowed to access. AI Lab Builder preview pages also show topology previews before approval.
 
-Clicking a node shows details only. There is no console, terminal, config apply, or topology editor in this phase.
+Clicking a node shows details. Router console is available only for supported running lab nodes; there is no full terminal, config apply, or topology editor in this phase.
+
+## Router Console
+
+For running labs you are allowed to access, click a console-capable node and open the console panel.
+
+FRR commands run through `vtysh` inside the lab router container. Host access, SSH exposure, Docker commands, and Containerlab commands are not available.
+
+Unsafe shell-like commands are blocked by policy.
 
 ## View Student Flow
 

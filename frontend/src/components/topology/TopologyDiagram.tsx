@@ -11,7 +11,17 @@ interface PositionedNode extends TopologyNode {
   y: number;
 }
 
-export function TopologyDiagram({ topology }: { topology: Topology }) {
+export function TopologyDiagram({
+  topology,
+  canOpenConsole,
+  onOpenConsole,
+  labRunning = false
+}: {
+  topology: Topology;
+  canOpenConsole?: (node: TopologyNode) => boolean;
+  onOpenConsole?: (node: TopologyNode) => void;
+  labRunning?: boolean;
+}) {
   const [selectedId, setSelectedId] = useState(topology.nodes[0]?.id || "");
   const positioned = useMemo(() => layoutNodes(topology.nodes), [topology.nodes]);
   const selected = positioned.find((node) => node.id === selectedId) || positioned[0] || null;
@@ -57,12 +67,30 @@ export function TopologyDiagram({ topology }: { topology: Topology }) {
           })}
         </svg>
       </div>
-      <NodeDetail node={selected} links={topology.links.filter((link) => selected && (link.source === selected.id || link.target === selected.id))} />
+      <NodeDetail
+        node={selected}
+        links={topology.links.filter((link) => selected && (link.source === selected.id || link.target === selected.id))}
+        canOpenConsole={canOpenConsole}
+        onOpenConsole={onOpenConsole}
+        labRunning={labRunning}
+      />
     </div>
   );
 }
 
-function NodeDetail({ node, links }: { node: PositionedNode | null; links: Topology["links"] }) {
+function NodeDetail({
+  node,
+  links,
+  canOpenConsole,
+  onOpenConsole,
+  labRunning
+}: {
+  node: PositionedNode | null;
+  links: Topology["links"];
+  canOpenConsole?: (node: TopologyNode) => boolean;
+  onOpenConsole?: (node: TopologyNode) => void;
+  labRunning: boolean;
+}) {
   if (!node) return <EmptyState title="No node selected" description="Click a node to inspect details." />;
   const Icon = iconForKind(node.kind);
   return (
@@ -82,7 +110,15 @@ function NodeDetail({ node, links }: { node: PositionedNode | null; links: Topol
         {node.container_name && <Detail label="Container" value={node.container_name} />}
         <Detail label="Interfaces" value={links.length ? links.map((link) => link.source === node.id ? link.source_interface : link.target_interface).filter(Boolean).join(", ") : "-"} />
       </div>
-      <Button className="mt-4 w-full bg-slate-200 text-slate-600 hover:bg-slate-200" disabled>Console access will be added in a future phase.</Button>
+      {onOpenConsole && canOpenConsole?.(node) ? (
+        <Button className="mt-4 w-full" disabled={!labRunning} onClick={() => onOpenConsole(node)}>
+          {labRunning ? "Open Console" : "Start the lab before opening console."}
+        </Button>
+      ) : (
+        <Button className="mt-4 w-full bg-slate-200 text-slate-600 hover:bg-slate-200" disabled>
+          Console unavailable for this node.
+        </Button>
+      )}
     </aside>
   );
 }

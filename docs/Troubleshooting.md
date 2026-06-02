@@ -200,6 +200,30 @@ links:
 
 Unknown endpoints show warnings but should not crash the page. The topology viewer is read-only and does not provide router console access.
 
+## Router Console Problem
+
+If console nodes are not shown:
+
+- Confirm the lab status is `RUNNING`.
+- Confirm worker inspection has populated LabNode records.
+- Confirm the node kind is `frr` or an allowed safe Linux node.
+
+If a command is blocked, simplify it to an allowed FRR command such as:
+
+```text
+show ip route
+show ip ospf neighbor
+show bgp summary
+```
+
+Shell-like syntax such as pipes, redirects, semicolons, Docker, Containerlab, package managers, host paths, and scripting tools is intentionally blocked.
+
+If execution times out, check celery worker logs:
+
+```bash
+docker compose -f /opt/isp-academy/deployments/docker-compose.yml logs --tail=100 celery_worker
+```
+
 ## Verification Stuck RUNNING
 
 Confirm the lab is `RUNNING`, the target node exists, and the worker is running:

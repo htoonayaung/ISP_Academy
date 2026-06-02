@@ -23,6 +23,7 @@ Completed:
 - Phase 10 production hardening scripts and operations documentation.
 - Phase 11A Lab Runtime Cleanup and Admin Operations.
 - Phase 11B read-only Topology Diagram Viewer.
+- Phase 11C Router Console Access MVP for lab-owned running nodes.
 - Demo rehearsal and release freeze documentation for `v0.3.0-demo-ready`.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
@@ -211,6 +212,25 @@ Behavior:
 - There is no router console, SSH runner, or web terminal in this phase.
 - Students can see only topology for active templates and their own labs.
 - Students cannot access AI Lab Builder preview topology.
+
+## Phase 11C Router Console Access MVP
+
+Running lab pages now include a lab-node-scoped console panel for supported nodes.
+
+Supported:
+
+- FRR nodes through worker-mediated `vtysh`.
+- Limited Linux read-only commands when available.
+- Quick commands such as `show ip route`, `show ip ospf neighbor`, `show bgp summary`, and `show running-config`.
+
+Security boundary:
+
+- Commands run only inside the selected lab node container.
+- Users cannot pass container names.
+- Students can use only their own running lab nodes.
+- Backend and frontend still have no Docker socket.
+- Docker exec happens only in `celery_worker`.
+- No SSH exposure, full web terminal, PTY, host shell, Docker command access, or Containerlab command access is added.
 
 ## AI Lab Builder V1
 
@@ -404,6 +424,7 @@ Before broader deployment, replace this with a narrower lab executor boundary.
 - AI-generated FRR startup configs are previewed, not automatically wired into full lab deployment.
 - Runtime Ops is Phase 11A-level only; orphan detection is conservative and cleanup is demo-restricted.
 - Topology viewer is read-only and uses a simple automatic layout; advanced topology editing is not implemented.
+- Router console is command-execution MVP only, not an interactive PTY/WebSocket terminal.
 - No AI Mentor yet.
 - Production hardening is Phase 10-level only; full HA, SSO, observability, and isolation are not implemented.
 - No automated frontend test suite yet.

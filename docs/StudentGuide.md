@@ -27,7 +27,15 @@ Students can view read-only topology diagrams for published templates and their 
 
 On a lab page, the diagram may show node status and management IP after the lab is running. Clicking a node opens a detail panel.
 
-Console access is not available yet. Students cannot access AI Lab Builder preview topology or other students' lab topology.
+Students cannot access AI Lab Builder preview topology or other students' lab topology.
+
+## Router Console
+
+For your own running lab, click a console-capable node in the topology and choose `Open Console`.
+
+The console runs supported commands inside your lab router only. It does not provide host access, Docker access, SSH login, or a full web terminal.
+
+If the lab is not `RUNNING`, start the lab first.
 
 ## Start Lab
 
