@@ -123,14 +123,25 @@ class OpenAICompatibleProvider(AIProvider):
             "max_tokens": self.config.max_tokens,
             "response_format": {"type": "json_object"},
         }
-        async with httpx.AsyncClient(timeout=self.config.request_timeout_seconds) as client:
-            response = await client.post(
-                f"{self.config.base_url.rstrip('/')}/chat/completions",  # type: ignore[union-attr]
-                headers={"Authorization": f"Bearer {self.config.api_key}"},
-                json=payload,
-            )
-        response.raise_for_status()
-        content = response.json()["choices"][0]["message"]["content"]
+        try:
+            async with httpx.AsyncClient(timeout=self.config.request_timeout_seconds) as client:
+                response = await client.post(
+                    f"{self.config.base_url.rstrip('/')}/chat/completions",  # type: ignore[union-attr]
+                    headers={"Authorization": f"Bearer {self.config.api_key}"},
+                    json=payload,
+                )
+        except httpx.TimeoutException as exc:
+            raise AIProviderResponseError("AI provider request timed out") from exc
+        except httpx.RequestError as exc:
+            raise AIProviderResponseError("AI provider request failed") from exc
+
+        response_data = _parse_provider_response_json(response)
+        if response.status_code >= 400:
+            raise AIProviderResponseError(_provider_error_message(response.status_code, response_data))
+        if isinstance(response_data, dict) and response_data.get("error"):
+            raise AIProviderResponseError(_provider_error_message(response.status_code, response_data))
+
+        content = _extract_chat_completion_content(response_data)
         try:
             return parse_ai_json_response(content)
         except ValueError as exc:
@@ -209,6 +220,56 @@ def parse_ai_json_response(content: str) -> dict[str, Any]:
         if isinstance(parsed, dict):
             return parsed
     raise ValueError("AI provider returned invalid JSON")
+
+
+def _parse_provider_response_json(response: httpx.Response) -> Any:
+    try:
+        return response.json()
+    except ValueError as exc:
+        raise AIProviderResponseError("AI provider returned a non-JSON response") from exc
+
+
+def _provider_error_message(status_code: int, response_data: Any) -> str:
+    message = "AI provider request failed"
+    if isinstance(response_data, dict):
+        error = response_data.get("error")
+        if isinstance(error, dict):
+            raw_message = error.get("message")
+            metadata = error.get("metadata")
+            retry_after = None
+            if isinstance(metadata, dict):
+                retry_after = metadata.get("retry_after_seconds")
+            if raw_message:
+                message = str(raw_message)
+            if retry_after:
+                message = f"{message} Retry after {retry_after} seconds."
+        elif isinstance(error, str):
+            message = error
+    if status_code == 429:
+        return f"AI provider rate limit reached. {message}"
+    if status_code in {401, 403}:
+        return "AI provider rejected the configured API key or permissions"
+    if status_code == 402:
+        return "AI provider account requires credits or billing"
+    return message
+
+
+def _extract_chat_completion_content(response_data: Any) -> str:
+    if not isinstance(response_data, dict):
+        raise AIProviderResponseError("AI provider returned an unexpected response shape")
+    choices = response_data.get("choices")
+    if not isinstance(choices, list) or not choices:
+        raise AIProviderResponseError("AI provider response did not include choices")
+    first_choice = choices[0]
+    if not isinstance(first_choice, dict):
+        raise AIProviderResponseError("AI provider returned an invalid choice")
+    message = first_choice.get("message")
+    if not isinstance(message, dict):
+        raise AIProviderResponseError("AI provider returned a choice without a message")
+    content = message.get("content")
+    if not isinstance(content, str) or not content.strip():
+        raise AIProviderResponseError("AI provider returned an empty message")
+    return content
 
 
 def _extract_json_object(content: str) -> str | None:
