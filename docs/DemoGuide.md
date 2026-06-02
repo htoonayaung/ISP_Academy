@@ -4,13 +4,42 @@
 
 This guide walks through the current AI-Powered ISP Academy MVP demo. The demo proves the core training workflow: users log in by role, instructors prepare safe lab content, students start a ticket attempt, Containerlab creates the lab, and verification checks return a result.
 
+## One-Click Demo Setup
+
+Admin can use the Demo Setup Wizard:
+
+```text
+http://10.0.44.2:3000/admin/demo-setup
+```
+
+Steps:
+
+1. Log in as Admin.
+2. Open Demo Setup.
+3. Review readiness status.
+4. Click Run Demo Setup.
+5. Store any generated demo passwords shown in the response.
+6. Confirm the page shows demo-ready status.
+
+The setup creates demo-prefixed records only and does not start labs, call AI, create LabInstances, or run Containerlab.
+
+## Demo Reset Warning
+
+Reset requires typing:
+
+```text
+RESET_DEMO_DATA
+```
+
+Reset targets demo-prefixed data only. If demo labs are running, stop or destroy them from the UI before resetting.
+
 ## URLs
 
 - Frontend: `http://10.0.44.2:3000`
 - Backend API: `http://10.0.44.2:8000`
 - Swagger: `http://10.0.44.2:8000/docs`
 
-## Demo Account Setup
+## Manual Demo Account Setup
 
 Use the seeded admin account to create instructor and student demo accounts.
 

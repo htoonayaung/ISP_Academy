@@ -17,6 +17,7 @@ Completed:
 - Minimal React, TypeScript, TailwindCSS frontend.
 - Role-aware navigation and demo-ready browser workflow.
 - AI Lab Builder v1 preview, validation, and approval into inactive lab templates.
+- Admin-only Demo Setup Wizard for repeatable MVP demos.
 - Demo, admin, instructor, student, troubleshooting, and backup/restore docs.
 
 Not included yet:
@@ -150,6 +151,42 @@ Phase 8 behavior:
 - Approval does not create, start, inspect, stop, or destroy a lab.
 - Real provider usage requires explicit confirmation when configured.
 - Students cannot access AI Lab Builder routes or menus.
+
+## Phase 9A Demo Setup Wizard
+
+Admins can open `http://10.0.44.2:3000/admin/demo-setup` to create repeatable demo data.
+
+The wizard creates demo-prefixed data only:
+
+- `demo_instructor`
+- `demo_student`
+- `Demo Basic Linux Lab`
+- `Demo Linux Verification Ticket`
+- `Demo uname verification`
+
+Setup is idempotent. It creates missing demo records only and does not start labs, run AI, create LabInstances, or execute Containerlab.
+
+Environment:
+
+```env
+DEMO_SETUP_ENABLED=true
+DEMO_INSTRUCTOR_USERNAME=demo_instructor
+DEMO_INSTRUCTOR_PASSWORD=
+DEMO_STUDENT_USERNAME=demo_student
+DEMO_STUDENT_PASSWORD=
+```
+
+If demo passwords are empty, setup generates secure passwords and returns them once in the setup response. Do not use demo passwords in production.
+
+API:
+
+```bash
+GET  /api/v1/admin/demo/status
+POST /api/v1/admin/demo/setup
+POST /api/v1/admin/demo/reset
+```
+
+Reset requires `RESET_DEMO_DATA` confirmation and targets demo-prefixed data only.
 
 ## Backup
 

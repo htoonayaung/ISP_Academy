@@ -65,6 +65,12 @@ class Settings(BaseSettings):
         alias="AI_REAL_PROVIDER_CONFIRMATION_REQUIRED",
     )
 
+    demo_setup_enabled: bool = Field(default=True, alias="DEMO_SETUP_ENABLED")
+    demo_instructor_username: str = Field(default="demo_instructor", alias="DEMO_INSTRUCTOR_USERNAME")
+    demo_instructor_password: str | None = Field(default=None, alias="DEMO_INSTRUCTOR_PASSWORD")
+    demo_student_username: str = Field(default="demo_student", alias="DEMO_STUDENT_USERNAME")
+    demo_student_password: str | None = Field(default=None, alias="DEMO_STUDENT_PASSWORD")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

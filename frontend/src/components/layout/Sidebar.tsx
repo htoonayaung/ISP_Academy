@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { FlaskConical, Home, ListChecks, Network, ShieldCheck, Sparkles, Ticket, Users } from "lucide-react";
+import { FlaskConical, Home, ListChecks, Network, ShieldCheck, Sparkles, Ticket, Users, WandSparkles } from "lucide-react";
 import { useAuth } from "../../features/auth/authStore";
 
 const itemClass = ({ isActive }: { isActive: boolean }) =>
@@ -11,6 +11,7 @@ export function Sidebar() {
   const items = role === "ADMIN"
     ? [
         { to: "/dashboard", label: "Dashboard", icon: Home },
+        { to: "/admin/demo-setup", label: "Demo Setup", icon: WandSparkles },
         { to: "/ai-lab-builder", label: "AI Lab Builder", icon: Sparkles },
         { to: "/users", label: "Users", icon: Users },
         { to: "/lab-templates", label: "Lab Templates", icon: Network },

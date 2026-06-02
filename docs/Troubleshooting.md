@@ -190,3 +190,27 @@ The response never includes `AI_API_KEY`. It returns only `has_api_key` and a ho
 ## Daily Preview Limit
 
 For real providers, `AI_DAILY_PREVIEW_LIMIT_PER_USER` limits preview creation per user per day. Mock mode is intended for demos and avoids accidental quota usage.
+
+# Demo Setup Troubleshooting
+
+## Demo Setup Disabled
+
+If Demo Setup returns disabled, check:
+
+```bash
+grep DEMO_SETUP_ENABLED /opt/isp-academy/deployments/env/backend.env
+```
+
+Set `DEMO_SETUP_ENABLED=true` and restart backend.
+
+## Duplicate Demo Data
+
+Demo setup is idempotent. It should report existing demo records instead of duplicating them. If duplicate-looking data appears, check slugs/usernames start with `demo_` or `demo-`.
+
+## Demo Reset Blocked
+
+If reset is blocked due to running demo labs, destroy those demo labs from the UI first. Reset does not destroy running labs unless explicitly supported and confirmed.
+
+## Demo Account Login Issue
+
+If demo passwords were generated, they are shown only in the setup response. Run reset and setup again if you lost generated demo credentials.

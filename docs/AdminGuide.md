@@ -4,6 +4,22 @@
 
 Open `http://10.0.44.2:3000` and log in with an admin account. The Dashboard should show the admin name, username, and `ADMIN` role.
 
+## Demo Setup Wizard
+
+Open `http://10.0.44.2:3000/admin/demo-setup` as Admin.
+
+Use this page to create repeatable demo data:
+
+- Demo instructor account.
+- Demo student account.
+- Demo Basic Linux Lab template.
+- Demo Linux Verification Ticket.
+- Demo uname verification rule.
+
+The setup is idempotent and creates missing demo records only. It does not start labs, create LabInstances, call AI, or run Containerlab.
+
+Reset requires typing `RESET_DEMO_DATA` and targets demo-prefixed data only. Do not use demo passwords in production.
+
 ## Create Users
 
 1. Open `Users`.
